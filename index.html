@@ -575,11 +575,13 @@ class GNG {
   _finish(){ this._done=true; clearLetter(); if(this._cb)this._cb(this._calc()); }
   _calc(){
     let hits=0,miss=0,cr=0,fa=0,rtS=0,rtN=0,wN=0,mN=0;
-    this.trials.forEach(t=>t==='W'?wN++:mN++);
-    for(let i=0;i<this.trials.length;i++) if(!this.resp[i]) this.resp[i]={t:this.trials[i],r:'none',rt:null};
-    this.resp.forEach(r=>{ if(r.t==='W'){ if(r.r==='GO'){hits++;if(r.rt){rtS+=r.rt;rtN++;}}else miss++; } else { if(r.r==='GO')fa++; else cr++; } });
-    const responded=this.resp.filter(r=>r&&r.r!=='none').length;
-    return {n:responded,wN,mN,hits,miss,cr,fa,ac:wN>0?Math.round(hits/wN*100):0,cc:mN>0?Math.round(cr/mN*100):0,rt:rtN>0?Math.round(rtS/rtN):0,avgRT:rtN>0?Math.round(rtS/rtN):null};
+    // Only score trials that were actually presented (0..idx inclusive)
+    const shown=this.idx+1;
+    this.trials.slice(0,shown).forEach(t=>t==='W'?wN++:mN++);
+    for(let i=0;i<shown;i++) if(!this.resp[i]) this.resp[i]={t:this.trials[i],r:'none',rt:null};
+    this.resp.slice(0,shown).forEach(r=>{ if(r.t==='W'){ if(r.r==='GO'){hits++;if(r.rt){rtS+=r.rt;rtN++;}}else miss++; } else { if(r.r==='GO')fa++; else cr++; } });
+    const responded=this.resp.slice(0,shown).filter(r=>r&&r.r!=='none').length;
+    return {n:shown,wN,mN,hits,miss,cr,fa,ac:wN>0?Math.round(hits/wN*100):0,cc:mN>0?Math.round(cr/mN*100):0,rt:rtN>0?Math.round(rtS/rtN):0,avgRT:rtN>0?Math.round(rtS/rtN):null};
   }
 }
 
