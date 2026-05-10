@@ -161,9 +161,31 @@ p{font-size:15px;line-height:1.6;color:var(--g700)}
 .notes-ta:focus{outline:none;border-color:var(--navy)}
 
 @media(min-width:768px){.content{padding:28px;padding-bottom:calc(28px + env(safe-area-inset-bottom))}}
+
+/* LOGIN GATE */
+#login-gate{position:fixed;inset:0;background:var(--offwhite);z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px}
+#login-gate.hidden{display:none}
+.login-box{background:#fff;border-radius:18px;padding:40px 32px;box-shadow:0 4px 24px rgba(0,0,0,.10);width:100%;max-width:380px;text-align:center}
+.login-title{font-size:28px;font-weight:900;color:var(--navy);letter-spacing:.03em;margin-bottom:4px}
+.login-sub{font-size:13px;color:var(--g400);margin-bottom:28px;letter-spacing:.04em;text-transform:uppercase;font-weight:600}
+.login-err{font-size:14px;color:var(--red);font-weight:600;margin-top:12px;min-height:20px}
 </style>
 </head>
 <body>
+
+<!-- ======== LOGIN GATE ======== -->
+<div id="login-gate">
+  <div class="login-box">
+    <div class="login-title">COGCON®</div>
+    <div class="login-sub">Assessment Platform</div>
+    <div class="fg">
+      <label for="login-pw" style="text-align:left">Password</label>
+      <input id="login-pw" class="fc" type="password" placeholder="Enter password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="btn btn-navy" onclick="doLogin()">Login</button>
+    <div class="login-err" id="login-err"></div>
+  </div>
+</div>
 
 <!-- ======== SCREEN 1: SETUP ======== -->
 <div id="screen-setup" class="screen active">
@@ -1030,6 +1052,27 @@ self.addEventListener('fetch',e=>{e.respondWith(caches.open('cogcon-v3').then(c=
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
 APP.setLevel(1);
+</script>
+
+<script>
+// ── LOGIN GATE ────────────────────────────────────────────────────────────────
+(function(){
+  const PW='cogcon2024';
+  const gate=document.getElementById('login-gate');
+  if(sessionStorage.getItem('cog_auth')==='1'){gate.classList.add('hidden');return;}
+  gate.classList.remove('hidden');
+})();
+function doLogin(){
+  const val=document.getElementById('login-pw').value;
+  if(val==='cogcon2024'){
+    sessionStorage.setItem('cog_auth','1');
+    document.getElementById('login-gate').classList.add('hidden');
+  } else {
+    document.getElementById('login-err').textContent='Invalid password';
+    document.getElementById('login-pw').value='';
+    document.getElementById('login-pw').focus();
+  }
+}
 </script>
 </body>
 </html>
