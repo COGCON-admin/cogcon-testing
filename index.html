@@ -162,6 +162,14 @@ p{font-size:15px;line-height:1.6;color:var(--g700)}
 
 @media(min-width:768px){.content{padding:28px;padding-bottom:calc(28px + env(safe-area-inset-bottom))}}
 
+/* ACTIVATION TOGGLE */
+.toggle-sw{position:relative;display:inline-block;width:52px;height:30px;flex-shrink:0}
+.toggle-sw input{opacity:0;width:0;height:0;position:absolute}
+.toggle-slider{position:absolute;inset:0;background:var(--g200);border-radius:30px;transition:.25s;cursor:pointer}
+.toggle-slider:before{content:'';position:absolute;width:22px;height:22px;left:4px;bottom:4px;background:#fff;border-radius:50%;transition:.25s;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+.toggle-sw input:checked+.toggle-slider{background:var(--green)}
+.toggle-sw input:checked+.toggle-slider:before{transform:translateX(22px)}
+
 /* LOGIN GATE */
 #login-gate{position:fixed;inset:0;background:var(--offwhite);z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px}
 #login-gate.hidden{display:none}
@@ -213,6 +221,18 @@ p{font-size:15px;line-height:1.6;color:var(--g700)}
       <p class="sub" id="level-desc" style="margin-top:10px"></p>
     </div>
     <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:16px">
+        <div>
+          <h2 style="margin-bottom:4px">Physical Activation</h2>
+          <p class="sub">Include HR monitoring &amp; activation phase</p>
+        </div>
+        <label class="toggle-sw">
+          <input type="checkbox" id="s-activated" onchange="APP.toggleActivated(this.checked)">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+    <div class="card" id="rhr-card" style="display:none">
       <h2>Resting Heart Rate</h2>
       <p style="margin-bottom:14px">Enter resting HR from Firstbeat device before the session begins.</p>
       <div class="fg" style="margin-bottom:0"><label>Resting HR (bpm)</label><input type="number" class="fc" id="s-rhr" placeholder="e.g. 65" min="30" max="200" inputmode="numeric"></div>
@@ -281,7 +301,7 @@ p{font-size:15px;line-height:1.6;color:var(--g700)}
       </div>
     </div>
 
-    <button class="btn btn-green" onclick="APP.goActivation()" style="font-size:19px">I understand &mdash; I'm ready &rarr;</button>
+    <button class="btn btn-green" onclick="APP.goNext()" style="font-size:19px">I understand &mdash; I'm ready &rarr;</button>
   </div>
 </div>
 
@@ -417,7 +437,7 @@ p{font-size:15px;line-height:1.6;color:var(--g700)}
       <h3>Assessment Criteria</h3>
       <div class="crit-row"><span class="crit-label">Attentional Control (GO accuracy)</span><span class="crit-val" id="cv-ac">&#8212;</span><span class="crit-badge pend" id="cb-ac">?</span></div>
       <div class="crit-row"><span class="crit-label">Cognitive Control (inhibition on M)</span><span class="crit-val" id="cv-cc">&#8212;</span><span class="crit-badge pend" id="cb-cc">?</span></div>
-      <div class="crit-row"><span class="crit-label">Arousal Control (HR reduction)</span><span class="crit-val" id="cv-hr">&#8212;</span><span class="crit-badge pend" id="cb-hr">?</span></div>
+      <div class="crit-row hr-only"><span class="crit-label">Arousal Control (HR reduction)</span><span class="crit-val" id="cv-hr">&#8212;</span><span class="crit-badge pend" id="cb-hr">?</span></div>
       <div class="crit-row" style="flex-direction:column;align-items:flex-start">
         <div style="display:flex;width:100%;align-items:center;margin-bottom:10px">
           <span class="crit-label">Working Memory (Audio Brief)</span>
@@ -430,11 +450,11 @@ p{font-size:15px;line-height:1.6;color:var(--g700)}
     </div>
     <div class="card">
       <h3>Physiological Summary</h3>
-      <div class="crit-row"><span class="crit-label">Resting HR</span><span class="crit-val" id="r-rhr">&#8212;</span></div>
-      <div class="crit-row"><span class="crit-label">Peak HR (post activation)</span><span class="crit-val" id="r-peak">&#8212;</span></div>
-      <div class="crit-row"><span class="crit-label">Target HR (&minus;20%)</span><span class="crit-val" id="r-target">&#8212;</span></div>
-      <div class="crit-row"><span class="crit-label">HR at Test Completion</span><span class="crit-val" id="r-post">&#8212;</span></div>
-      <div class="crit-row"><span class="crit-label">HR Reduction Achieved</span><span class="crit-val" id="r-hred">&#8212;</span></div>
+      <div class="crit-row hr-only"><span class="crit-label">Resting HR</span><span class="crit-val" id="r-rhr">&#8212;</span></div>
+      <div class="crit-row hr-only"><span class="crit-label">Peak HR (post activation)</span><span class="crit-val" id="r-peak">&#8212;</span></div>
+      <div class="crit-row hr-only"><span class="crit-label">Target HR (&minus;20%)</span><span class="crit-val" id="r-target">&#8212;</span></div>
+      <div class="crit-row hr-only"><span class="crit-label">HR at Test Completion</span><span class="crit-val" id="r-post">&#8212;</span></div>
+      <div class="crit-row hr-only"><span class="crit-label">HR Reduction Achieved</span><span class="crit-val" id="r-hred">&#8212;</span></div>
     </div>
     <div class="card">
       <h3>GO / NO-GO Performance Detail</h3>
@@ -520,6 +540,7 @@ const TEST_MS  = 60000;
 const S = {
   level:1,
   name:'', org:'', assessor:'', date:'',
+  activated:false,
   rhr:null, peakHR:null, targetHR:null, postHR:null,
   gngResults:null,
   audioAns:['','',''],
@@ -655,14 +676,22 @@ const APP = {
   },
 
   // ── SETUP ───────────────────────────────────────────────────────────────────
+  toggleActivated(on){
+    S.activated=on;
+    g('rhr-card').style.display=on?'':'none';
+  },
+
   setup(){
     const name=g('s-name').value.trim(), org=g('s-org').value.trim(),
-          assessor=g('s-assessor').value.trim(), date=g('s-date').value.trim(),
-          rhr=parseInt(g('s-rhr').value);
+          assessor=g('s-assessor').value.trim(), date=g('s-date').value.trim();
     if(!name){alert('Enter candidate name.');return;}
     if(!org){alert('Enter organisation.');return;}
     if(!date||!/^\d{2}\/\d{2}\/\d{4}$/.test(date)){alert('Enter date in DD/MM/YYYY format.');return;}
-    if(!rhr||rhr<30||rhr>200){alert('Enter valid resting HR (30–200).');return;}
+    let rhr=null;
+    if(S.activated){
+      rhr=parseInt(g('s-rhr').value);
+      if(!rhr||rhr<30||rhr>200){alert('Enter valid resting HR (30–200).');return;}
+    }
     Object.assign(S,{name,org,assessor,date,rhr,level:S.level,recordId:null,
       peakHR:null,targetHR:null,postHR:null,gngResults:null,
       audioAns:['','',''],marks:[null,null,null]});
@@ -674,6 +703,12 @@ const APP = {
       ?'At Level '+S.level+', letters appear every '+lvl.ms+' ms. Stay sharp and respond fast.'
       :'At Level '+S.level+', letters appear every '+lvl.ms+' ms with '+LEVELS[S.level].dist+' blurred distractor'+(LEVELS[S.level].dist>1?'s':'')+' in the background. Focus on the clear centre letter — it is always readable.';
     this.showScreen('instructions');
+  },
+
+  // ── INSTRUCTIONS → NEXT STEP ────────────────────────────────────────────────
+  goNext(){
+    if(S.activated) this.goActivation();
+    else this.startGoNoGo();
   },
 
   // ── INSTRUCTIONS → ACTIVATION ───────────────────────────────────────────────
@@ -746,7 +781,7 @@ const APP = {
     g('gng-prog').textContent='Get ready…'; g('gng-time').textContent='60s';
     g('gng-fill').style.cssText='width:100%;transition:none';
     S.gng=new GNG(S.level);
-    setTimeout(()=>{ startFill(); S.gng.start(r=>{ clearInterval(_fillInt); S.gngResults=r; g('post-target').textContent=S.targetHR; APP.showScreen('post-hr'); }); },1500);
+    setTimeout(()=>{ startFill(); S.gng.start(r=>{ clearInterval(_fillInt); S.gngResults=r; if(S.activated){ g('post-target').textContent=S.targetHR; APP.showScreen('post-hr'); } else { APP.goQuestions(); } }); },1500);
   },
 
   respond(){ if(S.gng)S.gng.go(); },
@@ -782,12 +817,14 @@ const APP = {
     g('mv-ac').textContent=(gn?gn.ac:0)+'%'; g('mv-cc').textContent=(gn?gn.cc:0)+'%';
     g('mv-rt').textContent=(gn?gn.rt:0)+' ms'; g('mv-tot').textContent=gn?gn.n:0;
     const acP=gn&&gn.ac>=thr.ac, ccP=gn&&gn.cc>=thr.cc;
-    const hrP=hrRed!==null&&parseFloat(hrRed)>=20;
+    const hrP=S.activated?(hrRed!==null&&parseFloat(hrRed)>=20):true;
     g('m-ac').className='metric-item '+(acP?'pass':'fail');
     g('m-cc').className='metric-item '+(ccP?'pass':'fail');
     _badge('ac',(gn?gn.ac:0)+'%','≥'+thr.ac+'%',acP);
     _badge('cc',(gn?gn.cc:0)+'%','≥'+thr.cc+'%',ccP);
-    _badge('hr',hrRed!==null?hrRed+'%':'—','≥20%',hrP);
+    if(S.activated) _badge('hr',hrRed!==null?hrRed+'%':'—','≥20%',hrP);
+    // Show/hide HR rows
+    document.querySelectorAll('.hr-only').forEach(el=>el.style.display=S.activated?'':'none');
     // Coach marking rows
     const mc=g('coach-marks'); mc.innerHTML='';
     S.audioAns.forEach((ans,i)=>{
@@ -819,12 +856,12 @@ const APP = {
     const gn=S.gngResults, thr=DB.thresholds();
     const hrRed=S.peakHR&&S.postHR?((S.peakHR-S.postHR)/S.peakHR*100).toFixed(1):null;
     const acP=gn&&gn.ac>=thr.ac, ccP=gn&&gn.cc>=thr.cc;
-    const hrP=hrRed!==null&&parseFloat(hrRed)>=20;
+    const hrP=S.activated?(hrRed!==null&&parseFloat(hrRed)>=20):true;
     const ok=S.marks.filter(m=>m===true).length;
     const wmP=S.marks.filter(m=>m!==null).length===3&&ok>=2;
     const rec={
       id:S.recordId||Date.now(), date:S.date, name:S.name, org:S.org,
-      assessor:S.assessor, level:S.level, rhr:S.rhr, peakHR:S.peakHR,
+      assessor:S.assessor, level:S.level, activated:S.activated, rhr:S.rhr, peakHR:S.peakHR,
       targetHR:S.targetHR, postHR:S.postHR, hrRed,
       gng:gn, audioAns:S.audioAns, marks:S.marks,
       notes:(g('coach-notes')||{}).value||'',
@@ -850,7 +887,7 @@ const APP = {
     const gn=S.gngResults, thr=DB.thresholds();
     const hrRed=S.peakHR&&S.postHR?((S.peakHR-S.postHR)/S.peakHR*100).toFixed(1):null;
     const acP=gn&&gn.ac>=thr.ac, ccP=gn&&gn.cc>=thr.cc;
-    const hrP=hrRed!==null&&parseFloat(hrRed)>=20;
+    const hrP=S.activated?(hrRed!==null&&parseFloat(hrRed)>=20):true;
     const ok=S.marks.filter(m=>m===true).length;
     const wmP=S.marks.filter(m=>m!==null).length===3&&ok>=2;
     const pass=acP&&ccP&&hrP&&wmP;
@@ -884,7 +921,7 @@ const APP = {
     doc.text('PERFORMANCE SUMMARY',M,y); y+=3;
     [['Attentional Control (GO accuracy)',(gn?gn.ac:0)+'%','≥'+thr.ac+'%',acP],
      ['Cognitive Control (inhibition on M)',(gn?gn.cc:0)+'%','≥'+thr.cc+'%',ccP],
-     ['Arousal Control (HR reduction)',(hrRed||'?')+'%','≥20%',hrP],
+     ...(S.activated?[['Arousal Control (HR reduction)',(hrRed||'?')+'%','≥20%',hrP]]:[]),
      ['Working Memory (Audio Brief)',ok+'/3','≥2/3',wmP],
      ['Average Response Time',(gn?gn.rt:0)+' ms','—',null]
     ].forEach(([l,v,tgt,p])=>{
@@ -899,7 +936,7 @@ const APP = {
 
     y+=12; doc.setFontSize(10); doc.setFont('helvetica','bold'); doc.setTextColor(...navy);
     doc.text('PHYSIOLOGICAL DATA',M,y); y+=3;
-    [['Resting HR',S.rhr+' bpm'],['Peak HR',S.peakHR+' bpm'],['Target HR (-20%)',S.targetHR+' bpm'],['Post-Test HR',(S.postHR||'—')+' bpm'],['HR Reduction',hrRed+'%']].forEach(([l,v])=>{
+    (S.activated?[['Resting HR',S.rhr+' bpm'],['Peak HR',S.peakHR+' bpm'],['Target HR (-20%)',S.targetHR+' bpm'],['Post-Test HR',(S.postHR||'—')+' bpm'],['HR Reduction',hrRed+'%']]:[]).forEach(([l,v])=>{
       y+=8; doc.setFillColor(...lg); doc.rect(M,y-5,W-M*2,8,'F');
       doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(...dg); doc.text(l,M+3,y);
       doc.setFont('helvetica','bold'); doc.setTextColor(...navy); doc.text(String(v),W-M-2,y,{align:'right'});
@@ -974,7 +1011,8 @@ function _updateWM(){
 function _updateBanner(){
   const gn=S.gngResults, thr=DB.thresholds();
   const hrRed=S.peakHR&&S.postHR?(S.peakHR-S.postHR)/S.peakHR*100:null;
-  const acP=gn&&gn.ac>=thr.ac, ccP=gn&&gn.cc>=thr.cc, hrP=hrRed!==null&&hrRed>=20;
+  const acP=gn&&gn.ac>=thr.ac, ccP=gn&&gn.cc>=thr.cc;
+  const hrP=S.activated?(hrRed!==null&&hrRed>=20):true;
   const ok=S.marks.filter(m=>m===true).length, pend=S.marks.filter(m=>m!==null).length<3;
   const wmP=!pend&&ok>=2;
   const banner=g('res-banner'),out=g('res-outcome');
@@ -1008,7 +1046,7 @@ function _renderLevelRef(){
   });
 }
 function _resetState(){
-  Object.assign(S,{level:1,name:'',org:'',assessor:'',date:'',rhr:null,peakHR:null,targetHR:null,postHR:null,gngResults:null,audioAns:['','',''],marks:[null,null,null],recordId:null,gng:null});
+  Object.assign(S,{level:1,name:'',org:'',assessor:'',date:'',activated:false,rhr:null,peakHR:null,targetHR:null,postHR:null,gngResults:null,audioAns:['','',''],marks:[null,null,null],recordId:null,gng:null});
   ['s-name','s-org','s-assessor','s-rhr','p-peak','p-post'].forEach(id=>{const e=g(id);if(e)e.value='';});
   g('s-date').value='';
   ['target-card','hr-preview'].forEach(id=>g(id).style.display='none');
