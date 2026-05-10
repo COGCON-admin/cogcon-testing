@@ -94,7 +94,7 @@ p{font-size:15px;line-height:1.6;color:var(--g700)}
 .gng-letter.blank{opacity:0}
 .gng-dist{position:absolute;font-size:min(46vw,46vh);font-weight:900;line-height:1;z-index:1;display:none;pointer-events:none;user-select:none;top:50%;left:50%;transform:translate(-50%,-50%)}
 .gng-dist2{position:absolute;font-size:min(38vw,38vh);font-weight:900;line-height:1;z-index:1;display:none;pointer-events:none;user-select:none;top:50%;left:50%;transform:translate(-50%,-50%)}
-.gng-go-btn{flex-shrink:0;background:var(--green);color:#fff;border:none;font-size:clamp(26px,5.5vw,42px);font-weight:900;letter-spacing:.07em;padding:clamp(30px,6.5vh,54px) 20px;cursor:pointer;touch-action:manipulation;user-select:none;transition:background .1s,opacity .1s;-webkit-tap-highlight-color:transparent;width:100%;display:block}
+.gng-go-btn{flex-shrink:0;background:var(--green);color:#fff;border:none;font-size:clamp(26px,5.5vw,42px);font-weight:900;letter-spacing:.07em;padding:clamp(30px,6.5vh,54px) 20px;cursor:pointer;touch-action:manipulation;user-select:none;transition:background .1s,opacity .1s;-webkit-tap-highlight-color:transparent;width:100%;display:block;margin-bottom:25vh}
 .gng-go-btn:active{background:var(--green2);opacity:.8}
 
 /* HR box */
@@ -281,18 +281,10 @@ p{font-size:15px;line-height:1.6;color:var(--g700)}
       </div>
     </div>
 
-    <button class="btn btn-green" onclick="APP.startPrestart()" style="font-size:19px">I understand &mdash; I'm ready &rarr;</button>
+    <button class="btn btn-green" onclick="APP.goActivation()" style="font-size:19px">I understand &mdash; I'm ready &rarr;</button>
   </div>
 </div>
 
-<!-- ======== SCREEN 2b: PRE-START COUNTDOWN ======== -->
-<div id="screen-prestart" class="screen" style="background:#080C17;align-items:center;justify-content:center;flex-direction:column">
-  <div style="text-align:center;padding:20px">
-    <div style="color:rgba(255,255,255,.5);font-size:14px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px">TEST STARTS IN</div>
-    <div id="prestart-num" class="cd-num" style="color:#fff;font-size:clamp(100px,28vw,180px)">20</div>
-    <div style="color:rgba(255,255,255,.35);font-size:16px;margin-top:12px;font-weight:500">Get on your equipment now</div>
-  </div>
-</div>
 
 <!-- ======== SCREEN 3: ACTIVATION ======== -->
 <div id="screen-activation" class="screen">
@@ -679,19 +671,6 @@ const APP = {
       ?'At Level '+S.level+', letters appear every '+lvl.ms+' ms. Stay sharp and respond fast.'
       :'At Level '+S.level+', letters appear every '+lvl.ms+' ms with '+LEVELS[S.level].dist+' blurred distractor'+(LEVELS[S.level].dist>1?'s':'')+' in the background. Focus on the clear centre letter — it is always readable.';
     this.showScreen('instructions');
-  },
-
-  // ── PRE-START COUNTDOWN ─────────────────────────────────────────────────────
-  startPrestart(){
-    this.showScreen('prestart');
-    let n=20;
-    g('prestart-num').textContent=n;
-    if(this._prestartTimer) clearInterval(this._prestartTimer);
-    this._prestartTimer=setInterval(()=>{
-      n--;
-      g('prestart-num').textContent=n;
-      if(n<=0){ clearInterval(this._prestartTimer); this._prestartTimer=null; this.goActivation(); }
-    },1000);
   },
 
   // ── INSTRUCTIONS → ACTIVATION ───────────────────────────────────────────────
