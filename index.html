@@ -84,7 +84,7 @@ p{font-size:15px;line-height:1.6;color:var(--g700)}
 .level-pill{display:inline-block;background:var(--navy);color:#fff;font-size:13px;font-weight:700;padding:4px 12px;border-radius:20px;letter-spacing:.04em}
 
 /* GO/NO-GO SCREEN */
-#screen-gonogo{background:#080C17}
+#screen-gonogo{background:#080C17;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none}
 .gng-bar{height:6px;background:rgba(255,255,255,.08);flex-shrink:0}
 .gng-fill{height:100%;background:var(--navy2);width:100%;transition:width .4s linear}
 .gng-status{display:flex;justify-content:space-between;align-items:center;padding:8px 18px;background:rgba(0,0,0,.45);flex-shrink:0}
@@ -94,8 +94,9 @@ p{font-size:15px;line-height:1.6;color:var(--g700)}
 .gng-letter.blank{opacity:0}
 .gng-dist{position:absolute;font-size:min(46vw,46vh);font-weight:900;line-height:1;z-index:1;display:none;pointer-events:none;user-select:none;top:50%;left:50%;transform:translate(-50%,-50%)}
 .gng-dist2{position:absolute;font-size:min(38vw,38vh);font-weight:900;line-height:1;z-index:1;display:none;pointer-events:none;user-select:none;top:50%;left:50%;transform:translate(-50%,-50%)}
-.gng-go-btn{flex-shrink:0;background:var(--green);color:#fff;border:none;font-size:clamp(26px,5.5vw,42px);font-weight:900;letter-spacing:.07em;padding:clamp(30px,6.5vh,54px) 20px;cursor:pointer;touch-action:manipulation;user-select:none;transition:background .1s,opacity .1s;-webkit-tap-highlight-color:transparent;width:100%;display:block;margin-bottom:25vh}
-.gng-go-btn:active{background:var(--green2);opacity:.8}
+.gng-tap-hint{flex-shrink:0;text-align:center;padding:14px;color:rgba(255,255,255,.2);font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;pointer-events:none}
+@keyframes tap-flash{0%{opacity:.18}100%{opacity:0}}
+.gng-tap-ripple{position:fixed;inset:0;background:#fff;pointer-events:none;opacity:0;animation:tap-flash .25s ease-out forwards}
 
 /* HR box */
 .hr-box{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;border-radius:12px;padding:20px;text-align:center}
@@ -269,8 +270,8 @@ p{font-size:15px;line-height:1.6;color:var(--g700)}
       <div class="instr-step">
         <div class="instr-num">2</div>
         <div class="instr-body">
-          <h4>W = GO &middot; Press the button</h4>
-          <p>When you see W, press the GO button as fast as you can. When you see M, do NOT press. Stay still.</p>
+          <h4>W = GO &middot; Tap the screen</h4>
+          <p>When you see W, tap anywhere on the screen as fast as you can. When you see M, do NOT tap. Stay still.</p>
           <div class="instr-stimulus">
             <div class="stim-col">
               <div class="instr-w">W</div>
@@ -349,7 +350,7 @@ p{font-size:15px;line-height:1.6;color:var(--g700)}
 </div>
 
 <!-- ======== SCREEN 5: GO / NO-GO ======== -->
-<div id="screen-gonogo" class="screen">
+<div id="screen-gonogo" class="screen" ontouchstart="handleTap(event)" onclick="APP.respond()">
   <div class="gng-bar"><div class="gng-fill" id="gng-fill"></div></div>
   <div class="gng-status">
     <span id="gng-prog">Get ready&hellip;</span>
@@ -360,7 +361,7 @@ p{font-size:15px;line-height:1.6;color:var(--g700)}
     <span class="gng-dist2" id="gng-d2"></span>
     <span class="gng-letter blank" id="gng-letter"></span>
   </div>
-  <button class="gng-go-btn" ontouchstart="APP.respond()" onclick="APP.respond()">GO</button>
+  <div class="gng-tap-hint">TAP ANYWHERE &mdash; W only</div>
 </div>
 
 <!-- ======== SCREEN 6: POST-TEST HR ======== -->
@@ -648,6 +649,13 @@ function showLetter(type,level){
   }
 }
 function clearLetter(){ g('gng-letter').classList.add('blank'); g('gng-d1').style.display='none'; g('gng-d2').style.display='none'; }
+function handleTap(e){
+  e.preventDefault(); // blocks the ghost click iOS fires ~300ms later
+  APP.respond();
+  // brief screen flash for tactile feedback
+  const r=document.createElement('div'); r.className='gng-tap-ripple';
+  document.body.appendChild(r); setTimeout(()=>r.remove(),300);
+}
 function updateProg(cur,tot){ g('gng-prog').textContent=Math.ceil((tot-cur)/1000)+' s remaining'; }
 function startFill(){
   const fill=g('gng-fill'),timeEl=g('gng-time'), t0=performance.now();
