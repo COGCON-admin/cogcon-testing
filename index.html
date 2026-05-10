@@ -1057,14 +1057,14 @@ APP.setLevel(1);
 <script>
 // ── LOGIN GATE ────────────────────────────────────────────────────────────────
 (function(){
-  const PW='cogcon2024';
+  const PW='COGCON2026';
   const gate=document.getElementById('login-gate');
   if(sessionStorage.getItem('cog_auth')==='1'){gate.classList.add('hidden');return;}
   gate.classList.remove('hidden');
 })();
 function doLogin(){
   const val=document.getElementById('login-pw').value;
-  if(val==='cogcon2024'){
+  if(val==='COGCON2026'){
     sessionStorage.setItem('cog_auth','1');
     document.getElementById('login-gate').classList.add('hidden');
   } else {
