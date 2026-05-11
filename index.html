@@ -201,7 +201,7 @@ p{font-size:15px;line-height:1.6;color:var(--g700)}
           Baseline<div class="mode-sub">GNG only &middot; no HR</div>
         </button>
         <button class="mode-btn" id="mode-dt" onclick="APP.setMode('DT')">
-          Dual-Task<div class="mode-sub">GNG + audio + HR</div>
+          Dual-Task<div class="mode-sub">GNG + HR</div>
         </button>
       </div>
     </div>
@@ -213,13 +213,6 @@ p{font-size:15px;line-height:1.6;color:var(--g700)}
         <button class="lvl" data-l="3" onclick="APP.setLevel(3)">3</button>
       </div>
       <p class="sub" id="level-desc" style="margin-top:10px"></p>
-    </div>
-    <div class="card" id="audio-brief-card" style="display:none">
-      <h2>Audio Brief</h2>
-      <div class="fg" style="margin-bottom:0">
-        <label>Select Audio Brief</label>
-        <select class="fc" id="s-audio-brief"><option value="">&#8212; Select brief &#8212;</option></select>
-      </div>
     </div>
     <button class="btn btn-navy" onclick="APP.setup()">Continue &rarr;</button>
   </div>
@@ -343,14 +336,7 @@ p{font-size:15px;line-height:1.6;color:var(--g700)}
       <div class="metric-row"><span>Consecutive fails</span><span class="metric-val" id="br-consec-fail">&#8212;</span></div>
       <div class="rule-line"></div>
       <div id="br-next-level-msg" style="font-size:14px;color:var(--g700);margin-bottom:16px;text-align:center"></div>
-      <!-- Audio brief section (DT only) -->
-      <div id="br-audio-section" style="display:none">
-        <h3>Audio Brief &#8212; Mark Responses</h3>
-        <div id="br-audio-questions"></div>
-        <div class="metric-row"><span>Audio score</span><span class="metric-val" id="br-audio-score">&#8212;</span></div>
-        <div class="rule-line"></div>
-      </div>
-      <button class="btn btn-navy" id="br-continue-btn" onclick="APP.nextBlock()">Continue to Block 2 &rarr;</button>
+      <button class="btn btn-navy" id="br-continue-btn" onclick="APP.nextBlock()">View Results &rarr;</button>
     </div>
   </div>
 </div>
@@ -398,14 +384,7 @@ p{font-size:15px;line-height:1.6;color:var(--g700)}
       <div class="metric-row"><span>Commission errors</span><span class="metric-val" id="r-comm">&#8212;</span></div>
       <div class="metric-row"><span>Omission errors</span><span class="metric-val" id="r-omit">&#8212;</span></div>
       <div class="metric-row hr-only" style="display:none"><span>HR reduction</span><span class="metric-val" id="r-hrred">&#8212;</span></div>
-      <div class="metric-row audio-only" style="display:none"><span>Audio brief score</span><span class="metric-val" id="r-audio">&#8212;</span></div>
-      <div class="metric-row"><span>Level reached</span><span class="metric-val" id="r-level">&#8212;</span></div>
-      <div class="metric-row"><span>Blocks completed</span><span class="metric-val" id="r-blocks">&#8212;</span></div>
-      <div class="metric-row"><span>Consecutive passes</span><span class="metric-val" id="r-consec">&#8212;</span></div>
-    </div>
-    <div class="card">
-      <h3>Level Progression</h3>
-      <p id="r-progression" style="font-size:14px;color:var(--g700);line-height:1.7"></p>
+      <div class="metric-row"><span>Level</span><span class="metric-val" id="r-level">&#8212;</span></div>
     </div>
     <button class="btn btn-navy" onclick="APP.exportPDF()">&#128196; Download PDF Result Card</button>
     <button class="btn btn-outline" style="margin-top:10px" onclick="APP.exportCSV()">&#128190; Download CSV Data</button>
@@ -750,7 +729,6 @@ const APP = {
     S.mode = m;
     document.getElementById('mode-bl').classList.toggle('sel', m === 'BL');
     document.getElementById('mode-dt').classList.toggle('sel', m === 'DT');
-    document.getElementById('audio-brief-card').style.display = m === 'DT' ? '' : 'none';
   },
 
   setLevel(n) {
@@ -767,11 +745,6 @@ const APP = {
     if (!name) { alert('Enter candidate name.'); return; }
     if (!org) { alert('Enter organisation.'); return; }
     if (!date || !/^\d{2}\/\d{2}\/\d{4}$/.test(date)) { alert('Enter date in DD/MM/YYYY format.'); return; }
-    if (S.mode === 'DT') {
-      const briefId = document.getElementById('s-audio-brief').value;
-      if (!briefId) { alert('Select an audio brief for Dual-Task mode.'); return; }
-      S.audioBriefId = briefId;
-    }
     Object.assign(S, { name, org, assessor, date,
       currentBlock: 0, blocks: [], consecutivePasses: 0, consecutiveFails: 0,
       peakReadiness: false, levelHistory: [], postActHR: null, postTestHR: null,
@@ -779,13 +752,8 @@ const APP = {
     // Populate instructions screen
     document.getElementById('instr-meta').textContent = org + ' · ' + date + ' · Level ' + S.level + ' · ' + (S.mode === 'BL' ? 'Baseline' : 'Dual-Task');
     document.getElementById('instr-mode-label').textContent = S.mode === 'BL' ? 'Baseline' : 'Dual-Task';
-    if (S.mode === 'DT') {
-      document.getElementById('instr-step4-head').textContent = 'Listen to the audio brief during the test';
-      document.getElementById('instr-step4-body').textContent = 'An audio brief plays while you do the GNG. Try to remember the key information. You\'ll answer questions between blocks.';
-    } else {
-      document.getElementById('instr-step4-head').textContent = 'Stay focused for each 60-second block';
-      document.getElementById('instr-step4-body').textContent = 'Each block runs for 60 seconds. Results shown between blocks. Level adjusts based on performance.';
-    }
+    document.getElementById('instr-step4-head').textContent = 'Stay focused for the full 60 seconds';
+    document.getElementById('instr-step4-body').textContent = 'The test runs for 60 seconds. Results are shown immediately after.';
     this.showScreen('instructions');
   },
 
@@ -846,133 +814,13 @@ const APP = {
     result.gngPass = gngPass;
     result.inhibPass = inhibPass;
     result.attnPass = attnPass;
-    result.audioScore = null;
-    result.audioPass = S.mode === 'BL' ? true : null;
-    result.audioMarks = null;
     S.blocks.push(result);
-    this._showBetweenBlock(result);
+    this._finishAssessment();
   },
 
-  _showBetweenBlock(result) {
-    document.getElementById('br-title').textContent = 'Block ' + result.block + ' Complete';
-    document.getElementById('br-inhib').textContent = result.inhibition + '%';
-    document.getElementById('br-attn').textContent = result.attention + '%';
-    document.getElementById('br-rt').textContent = result.avgRT ? result.avgRT + ' ms' : '—';
-    document.getElementById('br-comm').textContent = result.fa;
-    document.getElementById('br-omit').textContent = result.miss;
-    document.getElementById('br-level').textContent = 'Level ' + result.level;
-    document.getElementById('br-consec-pass').textContent = S.consecutivePasses;
-    document.getElementById('br-consec-fail').textContent = S.consecutiveFails;
-
-    const audioSection = document.getElementById('br-audio-section');
-    if (S.mode === 'DT') {
-      audioSection.style.display = '';
-      this._renderAudioQuestions(result);
-    } else {
-      audioSection.style.display = 'none';
-    }
-
-    const blockPass = S.mode === 'BL' ? result.gngPass : null;
-    this._updateBetweenOutcome(result, blockPass);
-    this.showScreen('between');
-  },
-
-  _renderAudioQuestions(result) {
-    const container = document.getElementById('br-audio-questions');
-    const brief = DB.getBrief(S.audioBriefId);
-    if (!brief || !brief.questions) { container.innerHTML = '<p>No questions available.</p>'; return; }
-    container.innerHTML = '';
-    const blockIdx = result.block - 1;
-    result.audioMarks = [null, null, null];
-    brief.questions.forEach((q, i) => {
-      const d = document.createElement('div');
-      d.style.cssText = 'margin-bottom:14px;padding:12px;background:var(--g100);border-radius:8px';
-      d.innerHTML = '<div style="font-size:14px;color:var(--g700);margin-bottom:8px">Q' + (i+1) + ': ' + q + '</div>' +
-        '<div style="display:flex;gap:8px">' +
-        '<button class="btn btn-sm" id="aq-c-' + blockIdx + '-' + i + '" onclick="APP.markAudio(' + blockIdx + ',' + i + ',true)" style="flex:1;background:var(--g200);color:var(--g900)">Correct</button>' +
-        '<button class="btn btn-sm" id="aq-w-' + blockIdx + '-' + i + '" onclick="APP.markAudio(' + blockIdx + ',' + i + ',false)" style="flex:1;background:var(--g200);color:var(--g900)">Incorrect</button>' +
-        '</div>';
-      container.appendChild(d);
-    });
-    document.getElementById('br-audio-score').textContent = '— / 3';
-    document.getElementById('br-continue-btn').disabled = true;
-  },
-
-  markAudio(blockIdx, qIdx, correct) {
-    const block = S.blocks[blockIdx];
-    if (!block.audioMarks) block.audioMarks = [null, null, null];
-    block.audioMarks[qIdx] = correct;
-    const c = document.getElementById('aq-c-' + blockIdx + '-' + qIdx);
-    const w = document.getElementById('aq-w-' + blockIdx + '-' + qIdx);
-    if (c) { c.style.background = correct ? 'var(--green)' : 'var(--g200)'; c.style.color = correct ? '#fff' : 'var(--g900)'; }
-    if (w) { w.style.background = !correct ? 'var(--red)' : 'var(--g200)'; w.style.color = !correct ? '#fff' : 'var(--g900)'; }
-    const marks = block.audioMarks;
-    const marked = marks.filter(m => m !== null).length;
-    const score = marks.filter(m => m === true).length;
-    document.getElementById('br-audio-score').textContent = marked === 3 ? score + ' / 3' : '— / 3';
-    if (marked === 3) {
-      block.audioScore = score;
-      block.audioPass = score >= 2;
-      const blockPass = block.gngPass && block.audioPass;
-      this._updateBetweenOutcome(block, blockPass);
-      document.getElementById('br-continue-btn').disabled = false;
-    }
-  },
-
-  _updateBetweenOutcome(result, blockPass) {
-    const chip = document.getElementById('br-outcome-chip');
-    const msg = document.getElementById('br-next-level-msg');
-    if (blockPass === null) {
-      chip.className = 'pass-chip';
-      chip.textContent = 'Mark audio to continue';
-      chip.style.background = 'var(--g400)';
-      msg.textContent = '';
-      return;
-    }
-    chip.style.background = '';
-    if (blockPass) {
-      chip.className = 'pass-chip'; chip.textContent = 'PASS';
-      S.consecutivePasses++;
-      S.consecutiveFails = 0;
-    } else {
-      chip.className = 'fail-chip'; chip.textContent = 'FAIL';
-      S.consecutiveFails++;
-      S.consecutivePasses = 0;
-    }
-    // Progression message
-    if (S.level === 3 && S.consecutivePasses >= 2) {
-      msg.textContent = 'PEAK READINESS achieved! Assessment complete.';
-      S.peakReadiness = true;
-      document.getElementById('br-continue-btn').textContent = 'View Final Results →';
-    } else if (S.consecutivePasses >= 2 && S.level < 3) {
-      msg.textContent = '▲ Advancing to Level ' + (S.level + 1) + ' next block.';
-    } else if (S.consecutiveFails >= 3 && S.level > 1) {
-      msg.textContent = '▼ Dropping to Level ' + (S.level - 1) + ' next block.';
-    } else if (blockPass) {
-      msg.textContent = 'Pass ' + S.consecutivePasses + '/2 needed to advance.';
-    } else {
-      msg.textContent = 'Fail ' + S.consecutiveFails + '/3 before dropping.';
-    }
-    if (!S.peakReadiness) {
-      document.getElementById('br-continue-btn').textContent = 'Continue to Block ' + (result.block + 1) + ' →';
-    }
-  },
 
   nextBlock() {
-    if (S.peakReadiness) {
-      this._finishAssessment();
-      return;
-    }
-    // Apply level progression
-    const lastBlock = S.blocks[S.blocks.length - 1];
-    const blockPass = S.mode === 'BL' ? lastBlock.gngPass : (lastBlock.gngPass && lastBlock.audioPass);
-    if (blockPass) {
-      if (S.consecutivePasses >= 2 && S.level < 3) { S.level++; S.consecutivePasses = 0; }
-    } else {
-      if (S.consecutiveFails >= 3 && S.level > 1) { S.level--; S.consecutiveFails = 0; }
-    }
-    document.querySelectorAll('.lvl').forEach(b => b.classList.toggle('sel', +b.dataset.l === S.level));
-    this._startBlock();
+    this._finishAssessment();
   },
 
   _finishAssessment() {
@@ -1003,7 +851,6 @@ const APP = {
   _buildResults() {
     let totalFa = 0, totalMiss = 0, totalHits = 0, totalWN = 0, totalMN = 0, crTotal = 0;
     let bestRT = null;
-    let audioTotal = 0, audioBlocks = 0;
     const allRTs = [];
     S.blocks.forEach(b => {
       totalFa += b.fa; totalMiss += b.miss; totalHits += b.hits;
@@ -1012,24 +859,18 @@ const APP = {
         for (let i = 0; i < b.hits; i++) allRTs.push(b.avgRT);
       }
       if (b.bestRT && (bestRT === null || b.bestRT < bestRT)) bestRT = b.bestRT;
-      if (b.audioScore !== null && b.audioScore !== undefined) { audioTotal += b.audioScore; audioBlocks++; }
     });
     const inhibAcc = totalMN > 0 ? Math.round(crTotal / totalMN * 100) : 100;
     const attnAcc = totalWN > 0 ? Math.round(totalHits / totalWN * 100) : 0;
     const avgRT = allRTs.length ? Math.round(allRTs.reduce((s, v) => s + v, 0) / allRTs.length) : null;
 
-    let outcome;
-    if (S.peakReadiness) outcome = 'PEAK READINESS';
-    else if (S.level === 3) outcome = 'LEVEL 3';
-    else if (S.level === 2) outcome = 'LEVEL 2';
-    else outcome = 'LEVEL 1';
+    const outcome = S.level === 3 ? 'LEVEL 3' : S.level === 2 ? 'LEVEL 2' : 'LEVEL 1';
 
     const banner = document.getElementById('res-banner');
     const outcomeEl = document.getElementById('res-outcome');
     outcomeEl.textContent = outcome;
     banner.style.background = '';
-    if (S.peakReadiness) { banner.className = 'result-banner pass'; }
-    else if (S.level === 3) { banner.className = 'result-banner pass'; }
+    if (S.level === 3) { banner.className = 'result-banner pass'; }
     else if (S.level === 2) { banner.className = 'result-banner'; banner.style.background = '#2471A3'; }
     else { banner.className = 'result-banner'; banner.style.background = '#D4AC0D'; }
 
@@ -1041,45 +882,34 @@ const APP = {
     document.getElementById('r-comm').textContent = totalFa;
     document.getElementById('r-omit').textContent = totalMiss;
     document.getElementById('r-level').textContent = 'Level ' + S.level;
-    document.getElementById('r-blocks').textContent = S.blocks.length;
-    document.getElementById('r-consec').textContent = S.consecutivePasses;
 
     document.querySelectorAll('.hr-only').forEach(el => el.style.display = S.mode === 'DT' ? '' : 'none');
-    document.querySelectorAll('.audio-only').forEach(el => el.style.display = S.mode === 'DT' ? '' : 'none');
     if (S.mode === 'DT') {
       document.getElementById('r-hrred').textContent = S.hrReduction !== undefined ? S.hrReduction + '%' : '—';
-      const audioAvg = audioBlocks > 0 ? Math.round(audioTotal / audioBlocks * 10) / 10 : null;
-      document.getElementById('r-audio').textContent = audioAvg !== null ? audioAvg + '/3 avg' : '—';
     }
 
-    const prog = S.levelHistory.map((l, i) => 'Block ' + (i + 1) + ': L' + l).join(' → ');
-    document.getElementById('r-progression').textContent = prog + (S.peakReadiness ? ' → PEAK READINESS' : '');
-
-    S._resultsCache = { inhibAcc, attnAcc, avgRT, bestRT, totalFa, totalMiss, crTotal, totalWN, totalMN, outcome, audioTotal, audioBlocks };
+    S._resultsCache = { inhibAcc, attnAcc, avgRT, bestRT, totalFa, totalMiss, crTotal, totalWN, totalMN, outcome };
   },
 
   exportCSV() {
     const r = S._resultsCache || {};
     const rows = [
-      ['candidate_name','organisation','assessor','date','mode','block_number','level',
+      ['candidate_name','organisation','assessor','date','mode','level',
        'go_trials','nogo_trials','commission_errors','omission_errors',
        'inhibition_pct','attention_pct','avg_rt_ms','best_rt_ms','median_rt_ms',
-       'audio_score','post_activation_hr','post_test_hr','hr_reduction_pct',
-       'block_pass_fail','consecutive_passes','consecutive_fails','final_outcome']
+       'post_activation_hr','post_test_hr','hr_reduction_pct',
+       'block_pass_fail','final_outcome']
     ];
-    let cp = 0, cf = 0;
     S.blocks.forEach(b => {
-      const bPass = S.mode === 'BL' ? b.gngPass : (b.gngPass && b.audioPass);
-      if (bPass) { cp++; cf = 0; } else { cf++; cp = 0; }
+      const bPass = b.gngPass;
       rows.push([
-        S.name, S.org, S.assessor, S.date, S.mode, b.block, b.level,
+        S.name, S.org, S.assessor, S.date, S.mode, b.level,
         b.wN, b.mN, b.fa, b.miss,
         b.inhibition, b.attention,
         b.avgRT || '', b.bestRT || '', b.medianRT || '',
-        b.audioScore !== null && b.audioScore !== undefined ? b.audioScore : '',
         S.postActHR || '', S.postTestHR || '', S.hrReduction || '',
         bPass ? 'PASS' : 'FAIL',
-        cp, cf, r.outcome || ''
+        r.outcome || ''
       ]);
     });
     const csv = rows.map(row => row.map(v => '"' + String(v).replace(/"/g, '\"\"') + '"').join(',')).join('\n');
@@ -1107,7 +937,7 @@ const APP = {
     doc.setFontSize(7); doc.text('CONFIDENTIAL', W-M, 24, {align:'right'});
     // Outcome banner
     let y = 38;
-    const bannerCol = S.peakReadiness ? green : S.level >= 3 ? green : S.level === 2 ? [36,113,163] : [212,172,13];
+    const bannerCol = S.level >= 3 ? green : S.level === 2 ? [36,113,163] : [212,172,13];
     doc.setFillColor(...bannerCol);
     doc.rect(M, y, W-M*2, 20, 'F');
     doc.setTextColor(...white); doc.setFont('helvetica','bold'); doc.setFontSize(22);
@@ -1130,7 +960,6 @@ const APP = {
       ['Best RT', r.bestRT ? r.bestRT + ' ms' : '—', '—'],
       ['Commission errors', String(r.totalFa||0), '—'],
       ['Omission errors', String(r.totalMiss||0), '—'],
-      ['Blocks completed', String(S.blocks.length), '—'],
     ];
     if (S.mode === 'DT') {
       metrics.push(['HR reduction', S.hrReduction ? S.hrReduction + '%' : '—', '≥20%']);
@@ -1142,12 +971,6 @@ const APP = {
       doc.setFont('helvetica','bold'); doc.text(v, W-M-28, y, {align:'right'});
       doc.setFontSize(7); doc.setTextColor(...mg); doc.text(t, W-M-2, y, {align:'right'});
     });
-    // Level progression
-    y += 14; doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(...navy);
-    doc.text('LEVEL PROGRESSION', M, y); y += 6;
-    doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(...dg);
-    const progText = S.levelHistory.map((l,i) => 'B'+(i+1)+':L'+l).join(' → ') + (S.peakReadiness?' → PEAK':'')||'N/A';
-    doc.text(progText, M, y, {maxWidth: W-M*2});
     // Footer
     y = 282;
     doc.setFontSize(7); doc.setTextColor(...mg);
@@ -1166,7 +989,6 @@ const APP = {
     document.getElementById('s-date').value = '';
     this.setMode('BL');
     this.setLevel(2);
-    loadAudioBriefSelect();
     this.showScreen('setup');
   },
 
@@ -1230,18 +1052,6 @@ function _renderLevelRef() {
   });
 }
 
-function loadAudioBriefSelect() {
-  const sel = document.getElementById('s-audio-brief');
-  if (!sel) return;
-  const briefs = DB.getBriefs();
-  sel.innerHTML = '<option value="">&#8212; Select brief &#8212;</option>';
-  briefs.forEach(b => {
-    const o = document.createElement('option');
-    o.value = b.id; o.textContent = b.name;
-    sel.appendChild(o);
-  });
-}
-
 // ── SERVICE WORKER ────────────────────────────────────────────────────────────
 if ('serviceWorker' in navigator) {
   const sw = `self.addEventListener('install',()=>self.skipWaiting());
@@ -1262,7 +1072,6 @@ APP.setLevel(2);
   document.getElementById('s-date').value = dd + '/' + mm + '/' + yyyy;
 })();
 document.getElementById('s-date').addEventListener('input', function() { autoFormatDate(this); });
-loadAudioBriefSelect();
 </script>
 
 <script>
