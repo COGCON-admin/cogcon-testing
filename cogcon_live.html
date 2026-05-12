@@ -1,0 +1,1496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#1F3864">
+<title>COGCON® Live Coaching Tool</title>
+<style>
+:root {
+  --navy:#1F3864; --navy2:#28508F;
+  --green:#27AE60; --green2:#1E8449;
+  --red:#C0392B;
+  --white:#FFF; --offwhite:#F0F3F8;
+  --g100:#F5F7FA; --g200:#E0E6F0; --g400:#9BACC4; --g700:#4A5568; --g900:#1A202C;
+  --coh-hi:#00C896; --coh-mid:#FFA500; --coh-amb:#FF8C00; --coh-lo:#FF4444;
+  --bg-dark:#0D1B2A;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;font-family:-apple-system,"Helvetica Neue",Arial,sans-serif;background:var(--offwhite);color:var(--g900);overflow:hidden}
+
+.screen{display:none;height:100vh;width:100vw;position:absolute;top:0;left:0;flex-direction:column;overflow-y:auto;overflow-x:hidden}
+.screen.active{display:flex}
+
+/* ── HEADER ── */
+.hdr{background:var(--navy);padding:12px 18px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+.hdr-wordmark{color:#fff;font-size:20px;font-weight:900;letter-spacing:.04em}
+.hdr-wordmark sup{font-size:.55em;vertical-align:super}
+.hdr-title{color:rgba(255,255,255,.7);font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+.hdr-right{display:flex;align-items:center;gap:8px}
+.hdr-btn{background:none;border:none;color:rgba(255,255,255,.7);font-size:19px;cursor:pointer;padding:6px 8px;line-height:1;touch-action:manipulation;border-radius:6px}
+.hdr-btn:hover{color:#fff;background:rgba(255,255,255,.1)}
+
+/* ── LAYOUT ── */
+.content{flex:1;padding:20px;overflow-y:auto;padding-bottom:calc(20px + env(safe-area-inset-bottom))}
+.centered{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100%}
+.card{background:#fff;border-radius:14px;padding:22px;box-shadow:0 2px 12px rgba(0,0,0,.08);width:100%;max-width:600px;margin:0 auto}
+.card+.card{margin-top:14px}
+h2{font-size:20px;font-weight:700;color:var(--navy);margin-bottom:14px}
+h3{font-size:13px;font-weight:700;color:var(--navy);margin-bottom:8px}
+p{font-size:15px;line-height:1.6;color:var(--g700)}
+.sub{font-size:13px;color:var(--g400);margin-top:4px}
+
+.fg{margin-bottom:17px}
+.fg label{display:block;font-size:11px;font-weight:700;color:var(--navy);margin-bottom:5px;letter-spacing:.06em;text-transform:uppercase}
+.fc{width:100%;padding:13px 15px;font-size:17px;border:2px solid var(--g200);border-radius:9px;background:var(--g100);color:var(--g900);transition:border .2s;-webkit-appearance:none;font-family:inherit}
+.fc:focus{outline:none;border-color:var(--navy);background:#fff}
+@media(max-width:768px){.fc{font-size:16px}}
+
+.btn{display:block;width:100%;padding:17px 22px;font-size:17px;font-weight:700;border:none;border-radius:10px;cursor:pointer;text-align:center;letter-spacing:.02em;transition:all .15s;touch-action:manipulation;font-family:inherit}
+.btn:active{transform:scale(.98)}
+.btn+.btn{margin-top:11px}
+.btn-navy{background:var(--navy);color:#fff}
+.btn-navy:hover{background:var(--navy2)}
+.btn-outline{background:transparent;border:2px solid var(--navy);color:var(--navy)}
+.btn:disabled{opacity:.35;cursor:not-allowed;transform:none}
+
+/* ── TOGGLE SWITCH ── */
+.toggle-row{display:flex;align-items:center;justify-content:space-between}
+.toggle-sw{position:relative;display:inline-block;width:52px;height:30px;flex-shrink:0}
+.toggle-sw input{opacity:0;width:0;height:0;position:absolute}
+.toggle-slider{position:absolute;inset:0;background:var(--g200);border-radius:30px;transition:.25s;cursor:pointer}
+.toggle-slider:before{content:'';position:absolute;width:22px;height:22px;left:4px;bottom:4px;background:#fff;border-radius:50%;transition:.25s;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+.toggle-sw input:checked+.toggle-slider{background:var(--green)}
+.toggle-sw input:checked+.toggle-slider:before{transform:translateX(22px)}
+
+/* ── SUMMARY METRICS ── */
+.metric-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.metric-cell{background:var(--g100);border-radius:10px;padding:14px}
+.metric-cell-lbl{font-size:10px;font-weight:700;color:var(--g400);letter-spacing:.07em;text-transform:uppercase;margin-bottom:4px}
+.metric-cell-val{font-size:28px;font-weight:900;color:var(--navy);font-variant-numeric:tabular-nums}
+.metric-cell-unit{font-size:12px;color:var(--g400);font-weight:400;margin-left:2px}
+.band-row{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:12px}
+.band-cell{border-radius:7px;padding:10px 4px;text-align:center}
+.band-val{font-size:18px;font-weight:900;color:#fff}
+.band-lbl{font-size:9px;font-weight:700;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.05em;margin-top:3px}
+
+/* ── LOGIN GATE ── */
+#login-gate{position:fixed;inset:0;background:var(--offwhite);z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px}
+#login-gate.hidden{display:none}
+.login-box{background:#fff;border-radius:18px;padding:40px 32px;box-shadow:0 4px 24px rgba(0,0,0,.10);width:100%;max-width:380px;text-align:center}
+.login-title{font-size:28px;font-weight:900;color:var(--navy);letter-spacing:.03em;margin-bottom:4px}
+.login-sub{font-size:13px;color:var(--g400);margin-bottom:28px;letter-spacing:.04em;text-transform:uppercase;font-weight:600}
+.login-err{font-size:14px;color:var(--red);font-weight:600;margin-top:12px;min-height:20px}
+
+/* ── LIVE SCREEN ── */
+#screen-live{background:var(--bg-dark);overflow:hidden}
+#cam-visible{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1;display:none}
+.live-frame{position:absolute;inset:0;border:6px solid rgba(0,200,150,.55);z-index:10;pointer-events:none;border-radius:2px}
+
+/* Sidebar */
+.live-sidebar{position:absolute;left:14px;top:14px;bottom:96px;width:168px;background:rgba(0,0,0,.45);border-radius:10px;z-index:20;display:flex;flex-direction:column;padding:8px;gap:5px}
+.sidebar-lbl{font-size:10px;font-weight:700;color:rgba(255,255,255,.38);text-transform:uppercase;letter-spacing:.07em;text-align:center;flex-shrink:0}
+#hr-trace-canvas{display:block;flex:1;width:100%;min-height:0;border-radius:4px}
+.sidebar-auto-btn{background:rgba(255,255,255,.12);border:none;border-radius:5px;color:rgba(255,255,255,.7);font-size:11px;font-weight:700;padding:4px 0;cursor:pointer;touch-action:manipulation;letter-spacing:.05em;font-family:inherit}
+.sidebar-auto-btn:active{background:rgba(255,255,255,.25)}
+
+/* SEB bar */
+.seb-bar{height:28px;flex-shrink:0;border-radius:7px;background:rgba(255,255,255,.07);display:flex;align-items:center;justify-content:center;gap:5px;transition:background .5s}
+.seb-bar.active{background:var(--coh-hi);animation:sebPulse 2s ease-in-out infinite}
+@keyframes sebPulse{0%,100%{opacity:1}50%{opacity:.55}}
+.seb-lbl{font-size:11px;font-weight:800;color:rgba(255,255,255,.45);letter-spacing:.1em}
+.seb-bar.active .seb-lbl{color:#fff}
+
+/* Bottom bar */
+.live-bottom{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.72);z-index:20;padding-bottom:max(0px,env(safe-area-inset-bottom));flex-shrink:0}
+.xaxis-strip{display:flex;justify-content:space-between;align-items:center;padding:5px 16px 2px;border-bottom:1px solid rgba(255,255,255,.08)}
+.xaxis-lbl{font-size:10px;font-weight:600;color:rgba(255,255,255,.42);font-variant-numeric:tabular-nums}
+.xaxis-lbl.now{color:var(--coh-hi);font-weight:800}
+.xaxis-live-ind{font-size:11px;font-weight:800;color:var(--coh-hi);letter-spacing:.06em}
+.xaxis-live-ind.scrolled{color:var(--coh-amb)}
+.bottom-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 16px 8px}
+.rec-dot{font-size:13px;font-weight:700;color:#fff;min-width:64px;flex-shrink:0}
+.rec-dot.recording{color:var(--coh-lo);animation:recPulse 1.5s ease-in-out infinite}
+@keyframes recPulse{0%,100%{opacity:1}50%{opacity:.2}}
+.bottom-controls{display:flex;align-items:center;gap:8px}
+.ctrl-btn{padding:8px 14px;font-size:13px;font-weight:700;border-radius:8px;border:none;cursor:pointer;font-family:inherit;touch-action:manipulation;transition:opacity .15s}
+.ctrl-btn:active{opacity:.7}
+.ctrl-stop{background:var(--red);color:#fff}
+.ctrl-mode{background:rgba(255,255,255,.15);color:#fff;font-size:17px;padding:8px 12px}
+.live-readouts{display:flex;gap:20px;align-items:flex-end}
+.readout-block{text-align:center}
+.readout-lbl{display:block;font-size:10px;font-weight:700;color:rgba(255,255,255,.5);letter-spacing:.07em;text-transform:uppercase;margin-bottom:1px}
+.readout-val{font-size:52px;font-weight:900;color:#fff;font-variant-numeric:tabular-nums;line-height:1;display:block;transition:color .4s}
+.readout-unit{display:block;font-size:10px;color:rgba(255,255,255,.42);margin-top:1px}
+
+/* ── INFO PANEL ── */
+#info-panel{position:fixed;inset:0;z-index:9990;background:#fff;flex-direction:column;overflow:hidden;display:none}
+#info-panel.open{display:flex}
+.info-tab-bar{display:flex;background:var(--navy);flex-shrink:0;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.info-tab{flex:1;min-width:80px;padding:10px 6px;font-size:11px;font-weight:700;color:rgba(255,255,255,.55);border:none;background:none;cursor:pointer;letter-spacing:.04em;text-transform:uppercase;text-align:center;border-bottom:3px solid transparent;transition:all .2s;font-family:inherit;white-space:nowrap}
+.info-tab.active{color:#fff;border-bottom-color:#fff}
+.info-pane{display:none;padding:20px;max-width:700px;margin:0 auto;width:100%}
+.info-pane.active{display:block}
+.info-card{background:#fff;border:2px solid var(--g200);border-radius:12px;padding:18px;margin-bottom:14px}
+.info-card-icon{font-size:26px;margin-bottom:6px}
+.info-card h3{font-size:14px;font-weight:800;color:var(--navy);margin-bottom:8px;text-transform:none;letter-spacing:0}
+.info-card .what-lbl{font-size:10px;font-weight:700;color:var(--g400);text-transform:uppercase;letter-spacing:.07em;margin-top:10px;margin-bottom:3px}
+.info-card p{font-size:14px;color:var(--g700);line-height:1.55}
+.colour-band{border-radius:8px;padding:14px 16px;margin-bottom:10px}
+.colour-band h4{font-size:14px;font-weight:800;color:#fff;margin-bottom:4px}
+.colour-band p{font-size:13px;color:rgba(255,255,255,.88);line-height:1.5}
+.colour-note{font-size:13px;color:var(--g700);font-style:italic;margin-top:14px;padding:12px;background:var(--g100);border-radius:8px;line-height:1.5}
+.seb-step{display:flex;gap:14px;margin-bottom:14px;align-items:flex-start}
+.seb-step-letter{width:40px;height:40px;border-radius:50%;background:var(--navy);color:#fff;font-size:18px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.seb-step-body h4{font-size:15px;font-weight:700;color:var(--navy);margin-bottom:4px}
+.seb-step-body p{font-size:14px;color:var(--g700);line-height:1.5}
+.green-callout{background:#E8FAF4;border-left:4px solid var(--coh-hi);border-radius:0 8px 8px 0;padding:14px 16px;margin-top:14px}
+.green-callout p{font-size:14px;color:var(--g900);line-height:1.6}
+.epoc-table{width:100%;border-collapse:collapse;margin:12px 0}
+.epoc-table th{font-size:11px;font-weight:700;color:var(--g400);text-transform:uppercase;letter-spacing:.06em;padding:6px 10px;text-align:left;border-bottom:2px solid var(--g200)}
+.epoc-table td{font-size:14px;padding:8px 10px;border-bottom:1px solid var(--g200);color:var(--g700)}
+.epoc-table tr:last-child td{border-bottom:none}
+.info-section-lbl{font-size:11px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.07em;margin:18px 0 8px}
+.info-note{font-size:13px;color:var(--g700);background:var(--g100);border-radius:8px;padding:12px 14px;line-height:1.6;margin-top:10px}
+
+/* ── BLE ERROR OVERLAY ── */
+#ble-error{position:fixed;inset:0;z-index:9980;background:#fff;flex-direction:column;overflow-y:auto;display:none}
+#ble-error.open{display:flex}
+.ble-err-body{flex:1;padding:24px;max-width:540px;margin:0 auto;width:100%}
+.ble-err-icon{font-size:48px;margin-bottom:12px;text-align:center}
+.ble-err-title{font-size:22px;font-weight:800;color:var(--navy);margin-bottom:8px}
+.ble-err-desc{font-size:15px;color:var(--g700);line-height:1.6;margin-bottom:20px}
+.ble-url-box{background:var(--g100);border-radius:8px;padding:14px;font-size:14px;color:var(--navy);font-weight:600;word-break:break-all;margin-bottom:16px;cursor:pointer;border:2px solid var(--g200)}
+.ble-step{display:flex;gap:12px;align-items:flex-start;margin-bottom:12px}
+.ble-step-num{width:28px;height:28px;border-radius:50%;background:var(--navy);color:#fff;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+
+@media(min-width:768px){.content{padding:28px;padding-bottom:calc(28px + env(safe-area-inset-bottom))}}
+</style>
+</head>
+<body>
+
+<!-- ══ LOGIN GATE ══ -->
+<div id="login-gate">
+  <div class="login-box">
+    <div class="login-title">COGCON<sup>®</sup></div>
+    <div class="login-sub">Live Coaching Tool</div>
+    <div class="fg">
+      <label for="lv-pw">Password</label>
+      <input id="lv-pw" class="fc" type="password" placeholder="Enter password"
+             autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="btn btn-navy" onclick="doLogin()">Login</button>
+    <div class="login-err" id="login-err"></div>
+  </div>
+</div>
+
+<!-- ══ SCREEN 1: SETUP ══ -->
+<div id="screen-setup" class="screen active">
+  <div class="hdr">
+    <span class="hdr-wordmark">COGCON<sup>®</sup></span>
+    <div class="hdr-right">
+      <span class="hdr-title">Live Coaching Tool</span>
+      <button class="hdr-btn" onclick="_openInfo()" title="Reference">&#9432;</button>
+    </div>
+  </div>
+  <div class="content centered">
+
+    <div class="card">
+      <h2>Session Setup</h2>
+      <div class="fg">
+        <label>Candidate Name</label>
+        <input type="text" class="fc" id="lv-name" autocapitalize="words" autocomplete="off">
+      </div>
+      <div class="fg">
+        <label>Organisation / Unit</label>
+        <input type="text" class="fc" id="lv-org" autocomplete="off">
+      </div>
+      <div class="fg">
+        <label>Assessor Name</label>
+        <input type="text" class="fc" id="lv-assessor" autocapitalize="words" autocomplete="off">
+      </div>
+      <div class="fg">
+        <label>Scenario / Exercise</label>
+        <input type="text" class="fc" id="lv-scenario" placeholder="e.g. BA Entry" autocomplete="off">
+      </div>
+      <div class="fg" style="margin-bottom:0">
+        <label>Date (DD/MM/YYYY)</label>
+        <input type="text" class="fc" id="lv-date" placeholder="DD/MM/YYYY" maxlength="10" inputmode="numeric">
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="toggle-row">
+        <span style="font-size:15px;font-weight:600;color:var(--navy)">Record Video</span>
+        <label class="toggle-sw">
+          <input type="checkbox" id="toggle-record" checked onchange="LV.onRecordToggle(this.checked)">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <p class="sub" id="record-note" style="display:none;margin-top:8px">
+        Live monitoring only — CSV data still captured
+      </p>
+    </div>
+
+    <button class="btn btn-outline" id="btn-strap" onclick="BLE.connect()"
+            style="max-width:600px">Connect Strap</button>
+    <p class="sub" id="strap-rr-note" style="display:none;text-align:center;max-width:600px;color:var(--coh-amb)">
+      ⚠ HR data only — no RR intervals detected. Coherence trace unavailable.
+    </p>
+    <button class="btn btn-navy" onclick="LV.startSession()"
+            style="max-width:600px">&#9654; Start Session</button>
+
+  </div>
+</div>
+
+<!-- ══ SCREEN 2: LIVE ══ -->
+<div id="screen-live" class="screen">
+  <video id="cam-visible" autoplay muted playsinline></video>
+  <div class="live-frame"></div>
+
+  <div class="live-sidebar">
+    <span class="sidebar-lbl">HR Trace</span>
+    <canvas id="hr-trace-canvas" ontouchstart="_traceTouch(event,'start')"
+            ontouchmove="_traceTouch(event,'move')" ontouchend="_traceTouch(event,'end')"></canvas>
+    <button class="sidebar-auto-btn" onclick="_autoYCenter()">AUTO</button>
+    <div class="seb-bar" id="seb-bar">
+      <span class="seb-lbl">SEB</span>
+    </div>
+  </div>
+
+  <!-- Info button overlay on live screen -->
+  <button onclick="_openInfo()" style="position:absolute;top:14px;right:14px;z-index:25;
+    background:rgba(0,0,0,.4);border:none;color:rgba(255,255,255,.7);font-size:19px;
+    padding:7px 10px;border-radius:8px;cursor:pointer;touch-action:manipulation;">&#9432;</button>
+
+  <div class="live-bottom">
+    <div class="xaxis-strip" id="xaxis-strip">
+      <!-- Populated dynamically -->
+    </div>
+    <div class="bottom-row">
+      <span class="rec-dot" id="rec-dot">&#9711; LIVE</span>
+      <div class="bottom-controls">
+        <button class="ctrl-btn ctrl-mode" id="btn-mode" onclick="LV.toggleTraceMode()"
+                title="Toggle trace colours">&#9788;</button>
+        <button class="ctrl-btn ctrl-stop" onclick="LV.stopSession()">&#9632; Stop</button>
+      </div>
+      <div class="live-readouts">
+        <div class="readout-block">
+          <span class="readout-lbl">HR</span>
+          <span class="readout-val" id="lv-hr">---</span>
+          <span class="readout-unit">BPM</span>
+        </div>
+        <div class="readout-block">
+          <span class="readout-lbl">EPOC</span>
+          <span class="readout-val" id="lv-epoc">--.-</span>
+          <span class="readout-unit">ml/kg</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Swipe zone for x-axis scroll (full screen behind sidebar) -->
+  <div id="swipe-zone" style="position:absolute;inset:0;z-index:15;pointer-events:none;"></div>
+</div>
+
+<!-- ══ SCREEN 3: SUMMARY ══ -->
+<div id="screen-summary" class="screen">
+  <div class="hdr">
+    <span class="hdr-wordmark">COGCON<sup>®</sup></span>
+    <div class="hdr-right">
+      <span class="hdr-title">Session Summary</span>
+      <button class="hdr-btn" onclick="_openInfo()" title="Reference">&#9432;</button>
+    </div>
+  </div>
+  <div class="content centered">
+
+    <div class="card">
+      <h2>Session Complete</h2>
+      <p class="sub" id="sum-meta" style="margin-bottom:16px"></p>
+      <div class="metric-grid">
+        <div class="metric-cell">
+          <div class="metric-cell-lbl">Duration</div>
+          <div class="metric-cell-val" id="sum-dur">—</div>
+        </div>
+        <div class="metric-cell">
+          <div class="metric-cell-lbl">Avg HR</div>
+          <div class="metric-cell-val" id="sum-hr">—</div>
+        </div>
+        <div class="metric-cell">
+          <div class="metric-cell-lbl">Peak EPOC</div>
+          <div class="metric-cell-val" id="sum-epoc">—</div>
+        </div>
+        <div class="metric-cell">
+          <div class="metric-cell-lbl">Avg Coherence</div>
+          <div class="metric-cell-val" id="sum-coh">—</div>
+        </div>
+      </div>
+      <p style="font-size:11px;font-weight:700;color:var(--g400);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">
+        Time in Coherence Band
+      </p>
+      <div class="band-row">
+        <div class="band-cell" style="background:var(--coh-hi)">
+          <div class="band-val" id="sum-hi">—</div>
+          <div class="band-lbl">&gt;70%</div>
+        </div>
+        <div class="band-cell" style="background:var(--coh-mid)">
+          <div class="band-val" id="sum-mid">—</div>
+          <div class="band-lbl">40–70%</div>
+        </div>
+        <div class="band-cell" style="background:var(--coh-amb)">
+          <div class="band-val" id="sum-amb">—</div>
+          <div class="band-lbl">20–40%</div>
+        </div>
+        <div class="band-cell" style="background:var(--coh-lo)">
+          <div class="band-val" id="sum-lo">—</div>
+          <div class="band-lbl">&lt;20%</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="width:100%;max-width:600px">
+      <button class="btn btn-navy" id="btn-dl-video" style="display:none"
+              onclick="downloadVideo(_recChunks)">&#11015; Download Video (.webm)</button>
+      <button class="btn btn-navy" onclick="downloadCSV()">&#11015; Download CSV Data</button>
+      <p style="font-size:12px;color:var(--g400);text-align:center;margin-top:10px;line-height:1.6">
+        Files also download automatically when session ends.<br>
+        On iPad, files save to Files app → Downloads folder.<br>
+        On Mac/PC, files save to your Downloads folder.
+      </p>
+      <button class="btn btn-outline" onclick="LV.newSession()" style="margin-top:14px">&#8592; New Session</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ INFO PANEL ══ -->
+<div id="info-panel">
+  <div class="hdr" style="flex-shrink:0">
+    <span class="hdr-wordmark">&#9432; COGCON<sup>®</sup> Reference</span>
+    <button class="hdr-btn" onclick="_closeInfo()" style="font-size:22px;font-weight:400">&#10005;</button>
+  </div>
+  <div class="info-tab-bar">
+    <button class="info-tab active" onclick="_infoTab(0)">What We Measure</button>
+    <button class="info-tab" onclick="_infoTab(1)">Colour Coding</button>
+    <button class="info-tab" onclick="_infoTab(2)">SEB Protocol</button>
+    <button class="info-tab" onclick="_infoTab(3)">EPOC &amp; Energy</button>
+  </div>
+  <div style="flex:1;overflow-y:auto">
+
+    <!-- TAB 0: What We Measure -->
+    <div class="info-pane active" id="info-pane-0">
+      <h2 style="margin-bottom:16px">What We're Measuring</h2>
+
+      <div class="info-card">
+        <div class="info-card-icon">&#9829;</div>
+        <h3>Heart Rate (Beat to Beat)</h3>
+        <div class="what-lbl">What it is</div>
+        <p>Beat-to-beat heart rate derived from the time between consecutive heartbeats (RR intervals), not a rolling average.</p>
+        <div class="what-lbl">Why it matters</div>
+        <p>Beat-to-beat data reveals the variability pattern — the natural fluctuation in time between beats that indicates how well the autonomic nervous system is regulating under stress.</p>
+        <div class="what-lbl">What to look for</div>
+        <p>A jagged, variable trace indicates good regulation. A flat, rigid trace at high HR indicates stress dominance.</p>
+      </div>
+
+      <div class="info-card">
+        <div class="info-card-icon">&#12316;</div>
+        <h3>HR Coherence</h3>
+        <div class="what-lbl">What it is</div>
+        <p>A measure of heart rate variability derived from the rolling 60-beat RMSSD of RR intervals, normalised to a 0–100% scale.</p>
+        <div class="what-lbl">Why it matters</div>
+        <p>Coherence reflects autonomic nervous system regulation. High coherence means the candidate is physiologically regulated. Low coherence means stress is dominating and cognitive performance is at risk.</p>
+        <div class="what-lbl">What to look for</div>
+        <p>Green trace = regulated. Red trace = dysregulated. Watch for colour shifts at scenario entry and during high-demand moments.</p>
+      </div>
+
+      <div class="info-card">
+        <div class="info-card-icon">&#8593;</div>
+        <h3>EPOC (Estimated)</h3>
+        <div class="what-lbl">What it is</div>
+        <p>Excess Post-exercise Oxygen Consumption — a measure of accumulated physiological cost. Displayed as an estimate derived from heart rate data.</p>
+        <div class="what-lbl">Why it matters</div>
+        <p>EPOC reflects the total physiological load on the candidate. Rising EPOC under moderate physical activity indicates stress activation is compounding the physical demand.</p>
+        <div class="what-lbl">What to look for</div>
+        <p>Rapid EPOC rise at scenario entry = high stress activation. Sustained elevation = accumulated load affecting cognitive capacity.</p>
+        <div class="what-lbl">Note</div>
+        <p>Precise EPOC is available post-session from Firstbeat XLSX export.</p>
+      </div>
+
+      <div class="info-card">
+        <div class="info-card-icon">&#9889;</div>
+        <h3>SEB Windows</h3>
+        <div class="what-lbl">What it is</div>
+        <p>Periods where coherence drops below 40% for 5 or more seconds — automatically detected and flagged.</p>
+        <div class="what-lbl">Why it matters</div>
+        <p>SEB windows are the moments where the candidate most needed to regulate. They are retrospective coaching anchors — where SEB would have had highest impact.</p>
+        <div class="what-lbl">What to look for</div>
+        <p>Green bar on screen edge = SEB window active. Count and timing of windows drives the retrospective debrief.</p>
+      </div>
+    </div>
+
+    <!-- TAB 1: Colour Coding -->
+    <div class="info-pane" id="info-pane-1">
+      <h2 style="margin-bottom:16px">HR Trace Colour Thresholds</h2>
+
+      <div class="colour-band" style="background:var(--coh-hi)">
+        <h4>GREEN / YELLOW — Regulated</h4>
+        <p>Coherence &gt; 70%<br>Autonomic regulation stable. Cognitive capacity protected. Optimal performance state.</p>
+      </div>
+      <div class="colour-band" style="background:var(--coh-mid)">
+        <h4>ORANGE — Moderate</h4>
+        <p>Coherence 40–70%<br>Regulation present but under load. Monitor for further drop. SEB proactively here prevents dysregulation.</p>
+      </div>
+      <div class="colour-band" style="background:var(--coh-amb)">
+        <h4>AMBER — Low / SEB Window</h4>
+        <p>Coherence 20–40%<br>Stress dominating. Cognitive performance at risk. SEB window active — highest leverage intervention point.</p>
+      </div>
+      <div class="colour-band" style="background:var(--coh-lo)">
+        <h4>RED — Dysregulated</h4>
+        <p>Coherence &lt; 20%<br>Significant dysregulation. Working memory and decision quality impaired. Immediate SEB required.</p>
+      </div>
+
+      <div class="colour-note">
+        Note: Colour is coherence, height is HR. A red trace at moderate HR is more concerning than an orange trace at high HR.
+      </div>
+    </div>
+
+    <!-- TAB 2: SEB Protocol -->
+    <div class="info-pane" id="info-pane-2">
+      <h2 style="margin-bottom:16px">SEB Cycle — Operational Reset Tool</h2>
+
+      <div class="seb-step">
+        <div class="seb-step-letter">S</div>
+        <div class="seb-step-body">
+          <h4>Self Check</h4>
+          <p>Rapid internal awareness check: heart rate, emotion, focus, information overload. Creates space between stimulus and response.</p>
+        </div>
+      </div>
+      <div class="seb-step">
+        <div class="seb-step-letter">E</div>
+        <div class="seb-step-body">
+          <h4>Eyes Up</h4>
+          <p>Deliberate widening of the attentional field. Breaks fixation. Restores scanning and situational awareness.</p>
+        </div>
+      </div>
+      <div class="seb-step">
+        <div class="seb-step-letter">B</div>
+        <div class="seb-step-body">
+          <h4>Breathing &amp; Body Language</h4>
+          <p>Tactical breath to downshift arousal. Body language as performance control — squared, upright, deliberate. Not cosmetic.</p>
+        </div>
+      </div>
+      <div class="seb-step">
+        <div class="seb-step-letter" style="font-size:12px;width:40px;height:40px">OPS</div>
+        <div class="seb-step-body">
+          <h4>Operational Performance Check</h4>
+          <p>Am I in an optimal Operational Performance State? If yes — continue. If no — run SEB again before acting.</p>
+        </div>
+      </div>
+      <div class="seb-step">
+        <div class="seb-step-letter" style="font-size:12px">WIN</div>
+        <div class="seb-step-body">
+          <h4>What's Important Now</h4>
+          <p>Priority anchor. Compresses attention onto the next correct action. The bridge between regulation and decision execution.</p>
+        </div>
+      </div>
+
+      <div class="info-section-lbl">Pre-Scenario Default Protocol</div>
+      <div class="green-callout">
+        <p>
+          1. Execute SEB the moment job comms come through — by default, not when stress is noticed.<br><br>
+          2. Apply multiple cycles in the truck if stress or worry builds during the wait.<br><br>
+          3. Final SEB in the last 90 seconds before exiting the truck.<br><br>
+          4. Identify WIN before the door opens.
+        </p>
+      </div>
+    </div>
+
+    <!-- TAB 3: EPOC & Energy -->
+    <div class="info-pane" id="info-pane-3">
+      <h2 style="margin-bottom:16px">EPOC &amp; Energy Rate Reference</h2>
+
+      <div class="info-section-lbl">EPOC Bands — Full PPE Operational Context</div>
+      <table class="epoc-table">
+        <tr><th>Band</th><th>EPOC</th><th>Context</th></tr>
+        <tr><td>Negligible</td><td>0–5 ml/kg</td><td>Normal pre-load</td></tr>
+        <tr><td>Low</td><td>5–20 ml/kg</td><td>Light operational demand</td></tr>
+        <tr><td>Moderate</td><td>20–60 ml/kg</td><td>Sustained operational load</td></tr>
+        <tr><td>High</td><td>60–120 ml/kg</td><td>Heavy sustained load</td></tr>
+        <tr><td>Very High</td><td>120+ ml/kg</td><td>Extreme accumulated cost</td></tr>
+      </table>
+
+      <div class="info-note">
+        <strong>PPE Note:</strong> Full structural PPE increases metabolic cost 30–50% above normal clothing. Thermal load drives cardiovascular drift independently of movement intensity. If BA mask is not fitted, breathing is unrestricted — thermal load and gear weight are the primary confounds.
+      </div>
+
+      <div class="info-section-lbl">Energy Rate Reference</div>
+      <div class="info-note">
+        Walking baseline: ~210 kcal/h<br>
+        PPE thermal minimum: ~330 kcal/h
+      </div>
+
+      <div class="info-section-lbl">Three Compounding Sources</div>
+      <div class="info-note">
+        1. Thermal load — PPE heat accumulation<br>
+        2. Stress activation — sympathetic NS demand<br>
+        3. Cognitive demand — mental effort under load
+      </div>
+
+      <div class="info-section-lbl">COGCON® Implication</div>
+      <div class="green-callout">
+        <p><strong>SEB as metabolic conservation tool:</strong> regulated coherence reduces stress-driven metabolic cost, preserving energy substrate for sustained operational performance.</p>
+      </div>
+    </div>
+
+  </div><!-- end scrollable info content -->
+</div>
+
+<!-- ══ BLE ERROR OVERLAY ══ -->
+<div id="ble-error">
+  <div class="hdr" style="flex-shrink:0">
+    <span class="hdr-wordmark">COGCON<sup>®</sup></span>
+    <button class="hdr-btn" onclick="_closeBLEError()" style="font-size:22px">&#10005;</button>
+  </div>
+  <div class="ble-err-body" id="ble-err-body">
+    <!-- Populated dynamically -->
+  </div>
+</div>
+
+<!-- ══ HIDDEN RECORDING ELEMENTS ══ -->
+<video id="cam-feed" autoplay muted playsinline
+       style="display:none;position:absolute;top:-9999px;left:-9999px"></video>
+<canvas id="rec-canvas"
+        style="display:none;position:absolute;top:-9999px;left:-9999px"></canvas>
+
+<script>
+'use strict';
+
+// ── SESSION STATE ─────────────────────────────────────────────────────────────
+const ST = {
+  name: '', org: '', assessor: '', scenario: '', date: '',
+  recordVideo: true,
+  darkTrace: true,
+  sessionStart: null,
+  sessionEnd: null,
+  hrLog: [],       // [{ts, hr, coh}] per second
+  peakEpoc: 0,
+  sebWindows: []   // [{start, end?}]
+};
+
+// ── BEAT-TO-BEAT BUFFERS ──────────────────────────────────────────────────────
+let _beatTimes = [];   // ms since sessionStart
+let _beatHR    = [];   // instantaneous HR (60000/rr_ms)
+let _beatCoh   = [];   // coherence at that beat
+const WINDOW_MS = 40000; // 40s visible window
+const KEEP_MS   = 300000; // keep 5 min of beat history
+
+// ── Y-AXIS STATE ──────────────────────────────────────────────────────────────
+let _yCenter = 120; // BPM at centre of trace
+let _yRange  = 80;  // total BPM span visible (40 above + 40 below centre)
+
+// ── X-AXIS STATE ──────────────────────────────────────────────────────────────
+let _xOffset = 0;   // seconds scrolled back from "now" (0 = live)
+
+// ── SEB DETECTION ─────────────────────────────────────────────────────────────
+let _sebStart  = null;
+let _sebActive = false;
+
+// ── BLE — Bluetooth HR strap ──────────────────────────────────────────────────
+const BLE = {
+  hr: null,
+  rrBuffer: [],
+  coherence: 0,
+  hasRR: false,
+  device: null,
+  char: null,
+  connected: false,
+  _rrCheckTimer: null,
+
+  async connect() {
+    if (!navigator.bluetooth) {
+      _showBLEError();
+      return;
+    }
+    try {
+      this.device = await navigator.bluetooth.requestDevice({
+        filters: [
+          { services: ['heart_rate'] },
+          { namePrefix: 'Firstbeat' },
+          { namePrefix: 'BEAT' }
+        ]
+      });
+      const server = await this.device.gatt.connect();
+      const svc    = await server.getPrimaryService('heart_rate');
+      this.char    = await svc.getCharacteristic('heart_rate_measurement');
+      await this.char.startNotifications();
+      this.char.addEventListener('characteristicvaluechanged', e => BLE.onData(e));
+      this.connected = true;
+      this.device.addEventListener('gattserverdisconnected', () => BLE.onDisconnect());
+
+      const btn = _g('btn-strap');
+      if (btn) {
+        btn.textContent = '✓ ' + (this.device.name || 'Strap') + ' — RR: checking…';
+        btn.disabled = true;
+        btn.style.borderColor = '#27AE60';
+        btn.style.color = '#27AE60';
+      }
+
+      // After 5s check whether RR data has arrived
+      this._rrCheckTimer = setTimeout(() => {
+        if (!this.hasRR) {
+          const btn2 = _g('btn-strap');
+          if (btn2) btn2.textContent = '✓ ' + (this.device.name || 'Strap') + ' — RR: No';
+          const note = _g('strap-rr-note');
+          if (note) note.style.display = '';
+        }
+      }, 5000);
+
+    } catch(e) {
+      if (e.name !== 'NotFoundError') _showBLEError(e.message);
+    }
+  },
+
+  onData(event) {
+    const v     = event.target.value;
+    const flags = v.getUint8(0);
+    const hr16  = flags & 0x01;
+    this.hr     = hr16 ? v.getUint16(1, true) : v.getUint8(1);
+
+    // Update DOM HR readout immediately on each beat
+    const hrEl = _g('lv-hr');
+    if (hrEl) {
+      hrEl.textContent = this.hr;
+      hrEl.style.color = _cohColour(this.coherence);
+    }
+
+    // RR intervals present when bit 4 of flags is set
+    if (flags & 0x10) {
+      if (!this.hasRR) {
+        this.hasRR = true;
+        const btn = _g('btn-strap');
+        if (btn && btn.disabled) {
+          btn.textContent = '✓ ' + (this.device ? (this.device.name || 'Strap') : 'Strap') + ' — RR: Yes';
+        }
+        const note = _g('strap-rr-note');
+        if (note) note.style.display = 'none';
+      }
+
+      let off = hr16 ? 3 : 2;
+      while (off + 1 < v.byteLength) {
+        const rr = v.getUint16(off, true) / 1024 * 1000; // 1/1024 s → ms
+        if (rr > 200 && rr < 3000) { // sanity check
+          this.rrBuffer.push(rr);
+          if (this.rrBuffer.length > 128) this.rrBuffer.shift();
+
+          // Push beat-to-beat data if session running
+          if (ST.sessionStart !== null) {
+            const instantHR = Math.round(60000 / rr);
+            const tNow = Date.now() - ST.sessionStart;
+            _beatTimes.push(tNow);
+            _beatHR.push(instantHR);
+            _beatCoh.push(this.coherence);
+            // Trim old beats
+            const cutoff = tNow - KEEP_MS;
+            while (_beatTimes.length && _beatTimes[0] < cutoff) {
+              _beatTimes.shift(); _beatHR.shift(); _beatCoh.shift();
+            }
+            _drawTrace();
+          }
+        }
+        off += 2;
+      }
+    }
+    this.coherence = _calcCoherence(this.rrBuffer);
+  },
+
+  onDisconnect() {
+    this.connected = false;
+    if (this._rrCheckTimer) { clearTimeout(this._rrCheckTimer); this._rrCheckTimer = null; }
+    const btn = _g('btn-strap');
+    if (btn) {
+      btn.textContent = 'Connect Strap';
+      btn.disabled = false;
+      btn.style.borderColor = '';
+      btn.style.color = '';
+    }
+  }
+};
+
+// ── COHERENCE — peak LF power / total power via DFT ──────────────────────────
+function _calcCoherence(rrBuf) {
+  if (rrBuf.length < 16) return 0;
+  const N       = Math.min(rrBuf.length, 64);
+  const buf     = rrBuf.slice(-N);
+  const totalMs = buf.reduce((a, b) => a + b, 0);
+  const sr      = 4;
+  const nSamp   = Math.round(totalMs / 1000 * sr);
+  if (nSamp < 8) return 0;
+
+  const signal = [];
+  let t = 0, tNext = buf[0], bi = 0;
+  for (let i = 0; i < nSamp; i++) {
+    const tgt = i / sr * 1000;
+    while (bi < buf.length - 1 && tNext <= tgt) { bi++; t = tNext; tNext += buf[bi]; }
+    const span = buf[bi] > 0 ? buf[bi] : 1;
+    const frac = Math.max(0, Math.min(1, (tgt - t) / span));
+    const prev = bi > 0 ? buf[bi - 1] : buf[0];
+    signal.push(prev + frac * (buf[bi] - prev));
+  }
+
+  const mean = signal.reduce((a, b) => a + b, 0) / signal.length;
+  const sig  = signal.map(x => x - mean);
+  let totalPow = 0, lfPeak = 0;
+  for (let k = 1; k <= 30; k++) {
+    const f = k * 0.02;
+    let re = 0, im = 0;
+    for (let i = 0; i < sig.length; i++) {
+      const a = 2 * Math.PI * f * i / sr;
+      re += sig[i] * Math.cos(a);
+      im -= sig[i] * Math.sin(a);
+    }
+    const p = re * re + im * im;
+    totalPow += p;
+    if (f >= 0.04 && f <= 0.26 && p > lfPeak) lfPeak = p;
+  }
+  if (totalPow === 0) return 0;
+  return Math.min(100, Math.round(lfPeak / totalPow * 100 * 3.5));
+}
+
+// ── COHERENCE COLOUR ──────────────────────────────────────────────────────────
+function _cohColour(coh) {
+  if (coh > 70)  return ST.darkTrace ? '#00C896' : '#FFD700';
+  if (coh >= 40) return '#FFA500';
+  if (coh >= 20) return '#FF8C00';
+  return '#FF4444';
+}
+
+// ── EPOC ACCUMULATION ─────────────────────────────────────────────────────────
+let _epoc = 0, _epocRest = 60;
+function _updateEpoc(hr) {
+  _epoc += Math.max(0, hr - _epocRest) * (1 / 60) * 0.1;
+}
+
+// ── HR TRACE CANVAS (beat-to-beat with y-axis) ────────────────────────────────
+function _drawTrace() {
+  const canvas = _g('hr-trace-canvas');
+  if (!canvas) return;
+  const W = canvas.offsetWidth, H = canvas.offsetHeight;
+  if (!W || !H) return;
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, W, H);
+
+  const LABEL_W = 30; // px reserved for y-axis labels on left
+  const plotW   = W - LABEL_W;
+  const plotX   = LABEL_W;
+
+  const yTop    = _yCenter + _yRange / 2;
+  const yBot    = _yCenter - _yRange / 2;
+
+  function hrToY(hr) {
+    return H - ((hr - yBot) / _yRange) * (H - 6) - 3;
+  }
+
+  // Grid lines + y-axis labels every 10 BPM
+  const firstGrid = Math.ceil(yBot / 10) * 10;
+  ctx.lineWidth = 0.5;
+  for (let bpm = firstGrid; bpm <= yTop; bpm += 10) {
+    const yy = hrToY(bpm);
+    ctx.beginPath();
+    ctx.strokeStyle = 'rgba(255,255,255,.15)';
+    ctx.moveTo(plotX, yy);
+    ctx.lineTo(W, yy);
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,.5)';
+    ctx.font = '11px -apple-system,Arial,sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillText(bpm, LABEL_W - 3, yy + 4);
+  }
+
+  if (_beatTimes.length < 2) return;
+
+  // Determine visible time window
+  const nowMs    = ST.sessionStart ? (Date.now() - ST.sessionStart) : 0;
+  const viewEnd  = nowMs - _xOffset * 1000;
+  const viewStart= viewEnd - WINDOW_MS;
+
+  ctx.lineWidth = 2;
+  ctx.lineJoin  = 'round';
+  let prevX = null, prevY = null;
+
+  for (let i = 0; i < _beatTimes.length; i++) {
+    const t  = _beatTimes[i];
+    if (t < viewStart || t > viewEnd) { prevX = null; continue; }
+    const x  = plotX + ((t - viewStart) / WINDOW_MS) * plotW;
+    const y  = hrToY(_beatHR[i]);
+    if (prevX !== null) {
+      ctx.beginPath();
+      ctx.strokeStyle = _cohColour(_beatCoh[i]);
+      ctx.moveTo(prevX, prevY);
+      ctx.lineTo(x, y);
+      ctx.stroke();
+    }
+    prevX = x; prevY = y;
+  }
+}
+
+// ── AUTO Y-CENTER ─────────────────────────────────────────────────────────────
+function _autoYCenter() {
+  const last10 = _beatHR.slice(-10);
+  if (last10.length === 0) return;
+  _yCenter = Math.round(last10.reduce((a, b) => a + b, 0) / last10.length);
+  _drawTrace();
+}
+
+// ── TRACE TOUCH (vertical swipe = adjust y-center) ───────────────────────────
+let _touchY0 = null;
+function _traceTouch(e, phase) {
+  e.preventDefault();
+  if (phase === 'start') {
+    _touchY0 = e.touches[0].clientY;
+  } else if (phase === 'move' && _touchY0 !== null) {
+    const dy = e.touches[0].clientY - _touchY0;
+    _yCenter = Math.max(60, Math.min(200, _yCenter + Math.round(dy * 0.5)));
+    _touchY0 = e.touches[0].clientY;
+    _drawTrace();
+  } else if (phase === 'end') {
+    _touchY0 = null;
+  }
+}
+
+// ── X-AXIS STRIP ──────────────────────────────────────────────────────────────
+function _updateXAxis() {
+  const strip = _g('xaxis-strip');
+  if (!strip) return;
+  const nowMs   = ST.sessionStart ? (Date.now() - ST.sessionStart) : 0;
+  const viewEnd = nowMs - _xOffset * 1000;
+  const STEPS   = 5; // 0, 10, 20, 30, NOW
+
+  let html = '';
+  for (let i = 0; i < STEPS; i++) {
+    const tMs = viewEnd - WINDOW_MS + (i / (STEPS - 1)) * WINDOW_MS;
+    const isNow = i === STEPS - 1 && _xOffset === 0;
+    if (isNow) {
+      html += '<span class="xaxis-lbl now">NOW</span>';
+    } else {
+      const secs = Math.max(0, Math.round(tMs / 1000));
+      const mm = String(Math.floor(secs / 60)).padStart(2, '0');
+      const ss = String(secs % 60).padStart(2, '0');
+      html += `<span class="xaxis-lbl">${mm}:${ss}</span>`;
+    }
+  }
+
+  const liveInd = _xOffset === 0
+    ? '<span class="xaxis-live-ind">&#9679; LIVE</span>'
+    : `<span class="xaxis-live-ind scrolled">${_xOffset}s ago</span>`;
+
+  strip.innerHTML = html + liveInd;
+}
+
+// ── SWIPE TO SCROLL X-AXIS ────────────────────────────────────────────────────
+let _swipeX0 = null;
+(function _setupSwipe() {
+  document.addEventListener('DOMContentLoaded', () => {
+    const zone = _g('swipe-zone');
+    if (!zone) return;
+    zone.style.pointerEvents = 'auto';
+    zone.addEventListener('touchstart', e => {
+      _swipeX0 = e.touches[0].clientX;
+    }, { passive: true });
+    zone.addEventListener('touchmove', e => {
+      if (_swipeX0 === null) return;
+      const dx = e.touches[0].clientX - _swipeX0;
+      // swipe left = scroll back; swipe right = forward
+      const nowMs = ST.sessionStart ? (Date.now() - ST.sessionStart) : 0;
+      const maxBack = Math.max(0, nowMs / 1000 - 40);
+      _xOffset = Math.max(0, Math.min(maxBack, _xOffset - dx * 0.05));
+      _swipeX0 = e.touches[0].clientX;
+      _drawTrace();
+      _updateXAxis();
+    }, { passive: true });
+    zone.addEventListener('touchend', () => { _swipeX0 = null; });
+  });
+})();
+
+// ── SEB DETECTION ─────────────────────────────────────────────────────────────
+function _checkSEB(hr, coh, now) {
+  if (hr !== null && coh < 40) {
+    if (_sebStart === null) _sebStart = now;
+    if (!_sebActive && (now - _sebStart) >= 5000) {
+      _sebActive = true;
+      ST.sebWindows.push({ start: _sebStart, end: null });
+      const bar = _g('seb-bar'); if (bar) bar.classList.add('active');
+    }
+  } else {
+    if (_sebActive) {
+      const last = ST.sebWindows[ST.sebWindows.length - 1];
+      if (last) last.end = now;
+      _sebActive = false;
+      const bar = _g('seb-bar'); if (bar) bar.classList.remove('active');
+    }
+    _sebStart = null;
+  }
+}
+
+// ── RECORDING CANVAS OVERLAY ──────────────────────────────────────────────────
+function _drawRecordOverlay(ctx, W, H) {
+  const font = '-apple-system,Arial,sans-serif';
+  const topH = Math.round(H * 0.062);
+  const botH = Math.round(H * 0.075);
+
+  // Teal perimeter border
+  ctx.save();
+  ctx.strokeStyle = 'rgba(0,200,150,.55)';
+  ctx.lineWidth = 5;
+  ctx.strokeRect(2.5, 2.5, W - 5, H - 5);
+  ctx.restore();
+
+  // ── TOP BAR ──
+  ctx.save();
+  ctx.fillStyle = 'rgba(31,56,100,.88)';
+  ctx.fillRect(0, 0, W, topH);
+  const pad  = Math.round(W * 0.012);
+  const fLg  = Math.max(11, Math.round(W * 0.016));
+  const fSm  = Math.max(9,  Math.round(W * 0.011));
+
+  // COGCON® left
+  ctx.fillStyle = '#ffffff';
+  ctx.font = `900 ${fLg}px ${font}`;
+  ctx.textAlign = 'left';
+  ctx.fillText('COGCON®', pad, topH * 0.72);
+
+  // Candidate — Scenario centre
+  const label = [ST.name, ST.scenario].filter(Boolean).join(' — ') || 'Live Session';
+  ctx.font = `600 ${fSm}px ${font}`;
+  ctx.textAlign = 'center';
+  ctx.fillText(label, W / 2, topH * 0.72);
+
+  // REC/LIVE right
+  const elapsed = ST.sessionStart ? Math.round((Date.now() - ST.sessionStart) / 1000) : 0;
+  const mm = String(Math.floor(elapsed / 60)).padStart(2, '0');
+  const ss = String(elapsed % 60).padStart(2, '0');
+  const recStr = ST.recordVideo ? `● REC ${mm}:${ss}` : `◎ LIVE ${mm}:${ss}`;
+  ctx.font = `700 ${fSm}px ${font}`;
+  ctx.textAlign = 'right';
+  ctx.fillStyle = ST.recordVideo ? '#FF4444' : '#ffffff';
+  ctx.fillText(recStr, W - pad, topH * 0.72);
+  ctx.restore();
+
+  // ── LEFT SIDEBAR TRACE ──
+  const sW = Math.round(W * 0.11);
+  const sH = Math.round(H * 0.52);
+  const sX = 14;
+  const sY = topH + Math.round((H - topH - botH - sH) * 0.5);
+  ctx.save();
+  ctx.fillStyle = 'rgba(0,0,0,.38)';
+  ctx.fillRect(sX, sY, sW, sH);
+
+  if (_beatTimes.length >= 2) {
+    const nowMs     = ST.sessionStart ? (Date.now() - ST.sessionStart) : 0;
+    const viewEnd   = nowMs;
+    const viewStart = viewEnd - WINDOW_MS;
+    let prevX = null, prevY = null;
+    ctx.lineWidth = 2;
+    for (let i = 0; i < _beatTimes.length; i++) {
+      const t = _beatTimes[i];
+      if (t < viewStart || t > viewEnd) { prevX = null; continue; }
+      const bx = sX + ((t - viewStart) / WINDOW_MS) * sW;
+      const by = sY + sH - ((_beatHR[i] - 40) / (_yRange)) * (sH - 8) - 4;
+      if (prevX !== null) {
+        ctx.beginPath();
+        ctx.strokeStyle = _cohColour(_beatCoh[i]);
+        ctx.moveTo(prevX, prevY);
+        ctx.lineTo(bx, by);
+        ctx.stroke();
+      }
+      prevX = bx; prevY = by;
+    }
+  }
+  ctx.restore();
+
+  // ── BOTTOM BAR ──
+  ctx.save();
+  ctx.fillStyle = 'rgba(31,56,100,.88)';
+  ctx.fillRect(0, H - botH, W, botH);
+
+  const hr  = BLE.hr;
+  const coh = BLE.coherence;
+  const bX  = W - Math.round(W * 0.012);
+  const bY  = H - Math.round(botH * 0.18);
+  const lblSz = Math.max(10, Math.round(W * 0.011));
+  const valSz = Math.max(28, Math.round(W * 0.048));
+  const g1    = Math.round(botH * 0.72);
+  const g2    = Math.round(botH * 0.18);
+  const g3    = Math.round(botH * 0.35);
+
+  ctx.textAlign = 'right';
+  // EPOC
+  ctx.fillStyle = 'rgba(255,255,255,.48)';
+  ctx.font = `700 ${lblSz}px ${font}`;
+  ctx.fillText('EPOC', bX, bY - g1);
+  ctx.fillStyle = '#fff';
+  ctx.font = `900 ${valSz}px ${font}`;
+  ctx.fillText(hr !== null ? _epoc.toFixed(1) : '--.-', bX, bY - g2);
+  ctx.fillStyle = 'rgba(255,255,255,.42)';
+  ctx.font = `700 ${lblSz}px ${font}`;
+  ctx.fillText('ml/kg', bX, bY + g3);
+
+  // HR
+  const hrX = bX - Math.round(W * 0.10);
+  ctx.fillStyle = 'rgba(255,255,255,.48)';
+  ctx.font = `700 ${lblSz}px ${font}`;
+  ctx.fillText('HR', hrX, bY - g1);
+  ctx.fillStyle = hr !== null ? _cohColour(coh) : '#fff';
+  ctx.font = `900 ${valSz}px ${font}`;
+  ctx.fillText(hr !== null ? String(hr) : '---', hrX, bY - g2);
+  ctx.fillStyle = 'rgba(255,255,255,.42)';
+  ctx.font = `700 ${lblSz}px ${font}`;
+  ctx.fillText('BPM', hrX, bY + g3);
+
+  ctx.restore();
+}
+
+// ── CAMERA + MEDIARECORDER ────────────────────────────────────────────────────
+let _camStream = null, _recorder = null, _recChunks = [], _rafId = null;
+
+async function _startCamera() {
+  try {
+    _camStream = await navigator.mediaDevices.getUserMedia(
+      { video: { facingMode: 'environment' }, audio: false }
+    );
+  } catch(e) {
+    try { _camStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false }); }
+    catch(e2) { console.warn('Camera unavailable:', e2.message); _camStream = null; return; }
+  }
+
+  const vis = _g('cam-visible');
+  vis.srcObject = _camStream;
+  vis.style.display = 'block';
+  await vis.play().catch(() => {});
+
+  const hid = _g('cam-feed');
+  hid.srcObject = _camStream;
+  await hid.play().catch(() => {});
+
+  const canvas = _g('rec-canvas');
+  const dpr    = window.devicePixelRatio || 1;
+  canvas.width  = Math.round(window.screen.width  * dpr);
+  canvas.height = Math.round(window.screen.height * dpr);
+  const ctx = canvas.getContext('2d');
+  _recChunks = [];
+
+  (function frame() {
+    if (!_camStream) return;
+    const CW = canvas.width, CH = canvas.height;
+    ctx.drawImage(hid, 0, 0, CW, CH);
+    _drawRecordOverlay(ctx, CW, CH);
+    _rafId = requestAnimationFrame(frame);
+  })();
+
+  const mime = ['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm']
+    .find(t => MediaRecorder.isTypeSupported(t)) || '';
+  _recorder = new MediaRecorder(canvas.captureStream(30), mime ? { mimeType: mime } : {});
+  _recorder.ondataavailable = e => { if (e.data && e.data.size > 0) _recChunks.push(e.data); };
+  _recorder.start(1000);
+}
+
+function _stopCamera() {
+  if (_rafId) { cancelAnimationFrame(_rafId); _rafId = null; }
+  if (_recorder && _recorder.state !== 'inactive') _recorder.stop();
+  if (_camStream) { _camStream.getTracks().forEach(t => t.stop()); _camStream = null; }
+  const vis = _g('cam-visible');
+  if (vis) { vis.srcObject = null; vis.style.display = 'none'; }
+}
+
+// ── DOWNLOAD FUNCTIONS ────────────────────────────────────────────────────────
+function downloadVideo(chunks) {
+  if (!chunks || chunks.length === 0) {
+    alert('No video data recorded.');
+    return;
+  }
+  const blob = new Blob(chunks, { type: 'video/webm' });
+  const url  = URL.createObjectURL(blob);
+  const name = 'COGCON_Live_'
+    + (ST.name.replace(/\s+/g, '_') || 'Session')
+    + '_' + (ST.date.replace(/\//g, '-') || 'date')
+    + '.webm';
+  const a = document.createElement('a');
+  a.style.display = 'none';
+  a.href = url;
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 2000);
+}
+
+function downloadCSV() {
+  const log  = ST.hrLog;
+  const dur  = ST.sessionEnd ? Math.round((ST.sessionEnd - ST.sessionStart) / 1000) : 0;
+  const hrs  = log.map(e => e.hr);
+  const cohs = log.map(e => e.coh);
+  const n    = cohs.length;
+  const avg  = arr => arr.length ? Math.round(arr.reduce((a,b)=>a+b,0)/arr.length) : '';
+  const pct  = k => n > 0 ? (k / n * 100).toFixed(1) : '';
+  const sebCount = ST.sebWindows.length;
+
+  const rows = [
+    ['candidate_name','organisation','assessor','scenario','date','duration_seconds',
+     'avg_hr_bpm','min_hr_bpm','max_hr_bpm',
+     'avg_coherence_pct','peak_epoc_mlkg',
+     'pct_time_gt70_coh','pct_time_40_70_coh','pct_time_20_40_coh','pct_time_lt20_coh',
+     'seb_window_count','video_recorded'],
+    [ST.name, ST.org, ST.assessor, ST.scenario, ST.date, dur,
+     avg(hrs),
+     hrs.length ? Math.min(...hrs) : '',
+     hrs.length ? Math.max(...hrs) : '',
+     avg(cohs),
+     ST.peakEpoc.toFixed(2),
+     pct(cohs.filter(c=>c>70).length),
+     pct(cohs.filter(c=>c>=40&&c<=70).length),
+     pct(cohs.filter(c=>c>=20&&c<40).length),
+     pct(cohs.filter(c=>c<20).length),
+     sebCount,
+     ST.recordVideo ? 'yes' : 'no']
+  ];
+
+  // Per-second log rows
+  rows.push(['--- per second log ---']);
+  rows.push(['elapsed_s','hr_bpm','coherence_pct']);
+  log.forEach((e, i) => {
+    rows.push([i + 1, e.hr, e.coh]);
+  });
+
+  const csvContent = rows
+    .map(r => r.map(v => '"' + String(v).replace(/"/g,'""') + '"').join(','))
+    .join('\n');
+
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const name = 'COGCON_Live_'
+    + (ST.name.replace(/\s+/g,'_') || 'Session')
+    + '_' + (ST.date.replace(/\//g,'-') || 'date')
+    + '.csv';
+  const a = document.createElement('a');
+  a.style.display = 'none';
+  a.href = url;
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 2000);
+}
+
+// ── LIVE UPDATE LOOP (1 s) ────────────────────────────────────────────────────
+let _liveTimer = null;
+
+function _startLoop() {
+  _epoc     = 0;
+  _epocRest = 60;
+  _beatTimes = []; _beatHR = []; _beatCoh = [];
+  _xOffset  = 0;
+  _yCenter  = 120;
+  _sebStart = null;
+  _sebActive = false;
+
+  _liveTimer = setInterval(() => {
+    const hr  = BLE.hr;
+    const coh = BLE.coherence;
+    const now = Date.now();
+
+    if (hr !== null) {
+      _updateEpoc(hr);
+      ST.hrLog.push({ ts: now, hr, coh });
+      if (_epoc > ST.peakEpoc) ST.peakEpoc = _epoc;
+    }
+
+    _checkSEB(hr, coh, now);
+
+    // EPOC readout (HR readout updated per beat in BLE.onData)
+    const epocEl = _g('lv-epoc');
+    if (epocEl) epocEl.textContent = _epoc.toFixed(1);
+
+    // If no RR data, fall back to per-second trace push
+    if (!BLE.hasRR && hr !== null && ST.sessionStart !== null) {
+      const t = now - ST.sessionStart;
+      _beatTimes.push(t);
+      _beatHR.push(hr);
+      _beatCoh.push(coh);
+    }
+
+    _drawTrace();
+    _updateXAxis();
+  }, 1000);
+}
+
+function _stopLoop() {
+  if (_liveTimer) { clearInterval(_liveTimer); _liveTimer = null; }
+}
+
+// ── BLE ERROR SCREEN ──────────────────────────────────────────────────────────
+function _showBLEError(errMsg) {
+  const isIOS    = /iP(ad|hone|od)/i.test(navigator.userAgent);
+  const isChrome = /Chrome/i.test(navigator.userAgent) && !/Edg/i.test(navigator.userAgent);
+  const body     = _g('ble-err-body');
+  const pageURL  = window.location.href;
+
+  let html = '';
+  if (isIOS) {
+    html = `
+      <div class="ble-err-icon">📱</div>
+      <div class="ble-err-title">Use Bluefy Browser on iPad / iPhone</div>
+      <div class="ble-err-desc">
+        Safari does not support Bluetooth. Download the free Bluefy browser app, then open this page in Bluefy.
+      </div>
+      <div class="ble-step">
+        <div class="ble-step-num">1</div>
+        <p style="font-size:15px;color:var(--g700)">Download <strong>Bluefy</strong> from the App Store (free, by Lau Meijer).</p>
+      </div>
+      <div class="ble-step">
+        <div class="ble-step-num">2</div>
+        <p style="font-size:15px;color:var(--g700)">Copy this URL and open it in Bluefy:</p>
+      </div>
+      <div class="ble-url-box" onclick="navigator.clipboard&&navigator.clipboard.writeText('${pageURL}').then(()=>alert('URL copied!'))">${pageURL}</div>
+      <div class="ble-step">
+        <div class="ble-step-num">3</div>
+        <p style="font-size:15px;color:var(--g700)">Tap Connect Strap again inside Bluefy.</p>
+      </div>
+    `;
+  } else if (!isChrome) {
+    html = `
+      <div class="ble-err-icon">💻</div>
+      <div class="ble-err-title">Use Google Chrome on Desktop</div>
+      <div class="ble-err-desc">
+        Bluetooth requires Google Chrome or Microsoft Edge. Your current browser does not support it.
+      </div>
+      <div class="ble-step">
+        <div class="ble-step-num">1</div>
+        <p style="font-size:15px;color:var(--g700)">Download Chrome from <strong>google.com/chrome</strong></p>
+      </div>
+      <div class="ble-step">
+        <div class="ble-step-num">2</div>
+        <p style="font-size:15px;color:var(--g700)">Open this page in Chrome and try again.</p>
+      </div>
+    `;
+  } else {
+    html = `
+      <div class="ble-err-icon">⚠️</div>
+      <div class="ble-err-title">Bluetooth Connection Failed</div>
+      <div class="ble-err-desc">${errMsg || 'Could not connect to the heart rate strap. Make sure it is charged, worn, and in pairing mode.'}</div>
+    `;
+  }
+
+  html += `<button class="btn btn-outline" onclick="_closeBLEError()" style="margin-top:24px">&#8592; Back</button>`;
+  body.innerHTML = html;
+  _g('ble-error').classList.add('open');
+}
+
+function _closeBLEError() {
+  _g('ble-error').classList.remove('open');
+}
+
+// ── APP CONTROLLER ────────────────────────────────────────────────────────────
+const LV = {
+
+  onRecordToggle(on) {
+    ST.recordVideo = on;
+    const note = _g('record-note');
+    if (note) note.style.display = on ? 'none' : '';
+  },
+
+  async startSession() {
+    const name     = _g('lv-name').value.trim();
+    const org      = _g('lv-org').value.trim();
+    const assessor = _g('lv-assessor').value.trim();
+    const scenario = _g('lv-scenario').value.trim();
+    const date     = _g('lv-date').value.trim();
+    if (!name) { alert('Enter candidate name.'); return; }
+    if (!org)  { alert('Enter organisation.'); return; }
+    if (!date || !/^\d{2}\/\d{2}\/\d{4}$/.test(date)) {
+      alert('Enter date in DD/MM/YYYY format.'); return;
+    }
+    Object.assign(ST, {
+      name, org, assessor, scenario, date,
+      sessionStart: Date.now(), sessionEnd: null,
+      hrLog: [], peakEpoc: 0, sebWindows: []
+    });
+
+    _showScreen('live');
+
+    const dot = _g('rec-dot');
+    if (ST.recordVideo) {
+      if (dot) { dot.innerHTML = '&#9679; REC'; dot.classList.add('recording'); }
+      await _startCamera();
+    } else {
+      if (dot) { dot.innerHTML = '&#9711; LIVE'; dot.classList.remove('recording'); }
+    }
+
+    _startLoop();
+  },
+
+  stopSession() {
+    ST.sessionEnd = Date.now();
+    _stopLoop();
+
+    // Close any open SEB window
+    if (_sebActive) {
+      const last = ST.sebWindows[ST.sebWindows.length - 1];
+      if (last) last.end = ST.sessionEnd;
+      _sebActive = false;
+    }
+
+    // Auto-download exports BEFORE clearing data
+    if (ST.recordVideo) {
+      _stopCamera();
+      setTimeout(() => downloadVideo(_recChunks), 400);
+    }
+    setTimeout(() => downloadCSV(), ST.recordVideo ? 1600 : 400);
+
+    this._buildSummary();
+    _showScreen('summary');
+  },
+
+  toggleTraceMode() {
+    ST.darkTrace = !ST.darkTrace;
+    const btn = _g('btn-mode');
+    if (btn) btn.innerHTML = ST.darkTrace ? '&#9788;' : '&#9790;';
+  },
+
+  _buildSummary() {
+    const log  = ST.hrLog;
+    const dur  = Math.round(((ST.sessionEnd || Date.now()) - ST.sessionStart) / 1000);
+    const mins = Math.floor(dur / 60);
+    const secs = dur % 60;
+    _g('sum-dur').textContent = `${mins}:${String(secs).padStart(2,'0')}`;
+    _g('sum-meta').textContent = [ST.name, ST.org, ST.scenario, ST.date].filter(Boolean).join(' · ');
+
+    if (log.length === 0) {
+      ['sum-hr','sum-epoc','sum-coh','sum-hi','sum-mid','sum-amb','sum-lo']
+        .forEach(id => { const el = _g(id); if (el) el.textContent = '—'; });
+      const vbtn = _g('btn-dl-video');
+      if (vbtn) vbtn.style.display = 'none';
+      return;
+    }
+
+    const hrs  = log.map(e => e.hr);
+    const cohs = log.map(e => e.coh);
+    const n    = cohs.length;
+    const avg  = arr => Math.round(arr.reduce((a,b)=>a+b,0)/arr.length);
+    const pct  = k => n > 0 ? Math.round(k / n * 100) + '%' : '—';
+
+    _g('sum-hr').innerHTML   = avg(hrs) + '<span class="metric-cell-unit">bpm</span>';
+    _g('sum-epoc').innerHTML = ST.peakEpoc.toFixed(1) + '<span class="metric-cell-unit">ml/kg</span>';
+    _g('sum-coh').innerHTML  = avg(cohs) + '<span class="metric-cell-unit">%</span>';
+    _g('sum-hi').textContent  = pct(cohs.filter(c=>c>70).length);
+    _g('sum-mid').textContent = pct(cohs.filter(c=>c>=40&&c<=70).length);
+    _g('sum-amb').textContent = pct(cohs.filter(c=>c>=20&&c<40).length);
+    _g('sum-lo').textContent  = pct(cohs.filter(c=>c<20).length);
+
+    const vbtn = _g('btn-dl-video');
+    if (vbtn) vbtn.style.display = ST.recordVideo ? '' : 'none';
+  },
+
+  newSession() {
+    _stopLoop();
+    if (ST.recordVideo) _stopCamera();
+    Object.assign(ST, {
+      name:'', org:'', assessor:'', scenario:'', date:'',
+      recordVideo:true, darkTrace:true,
+      sessionStart:null, sessionEnd:null,
+      hrLog:[], peakEpoc:0, sebWindows:[]
+    });
+    _epoc = 0; _recChunks = [];
+    _beatTimes = []; _beatHR = []; _beatCoh = [];
+    _xOffset = 0; _yCenter = 120;
+    const tr = _g('toggle-record'); if (tr) tr.checked = true;
+    const rn = _g('record-note');   if (rn) rn.style.display = 'none';
+    const mb = _g('btn-mode');      if (mb) mb.innerHTML = '&#9788;';
+    const sb = _g('seb-bar');       if (sb) sb.classList.remove('active');
+    ['lv-name','lv-org','lv-assessor','lv-scenario'].forEach(id => {
+      const el = _g(id); if (el) el.value = '';
+    });
+    _showScreen('setup');
+  }
+};
+
+// ── INFO PANEL ────────────────────────────────────────────────────────────────
+function _openInfo() {
+  _g('info-panel').classList.add('open');
+}
+function _closeInfo() {
+  _g('info-panel').classList.remove('open');
+}
+function _infoTab(idx) {
+  document.querySelectorAll('.info-tab').forEach((t,i) => {
+    t.classList.toggle('active', i === idx);
+  });
+  document.querySelectorAll('.info-pane').forEach((p,i) => {
+    p.classList.toggle('active', i === idx);
+  });
+}
+
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+function _g(id) { return document.getElementById(id); }
+
+function _showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  _g('screen-' + name).classList.add('active');
+}
+
+function _autoFormatDate(input) {
+  let v = input.value.replace(/\D/g,'');
+  if (v.length > 2) v = v.slice(0,2) + '/' + v.slice(2);
+  if (v.length > 5) v = v.slice(0,5) + '/' + v.slice(5);
+  input.value = v.slice(0,10);
+}
+
+function doLogin() {
+  const val = _g('lv-pw').value;
+  if (val === 'COGCON2026') {
+    sessionStorage.setItem('lv_auth','1');
+    _g('login-gate').classList.add('hidden');
+  } else {
+    _g('login-err').textContent = 'Invalid password';
+    _g('lv-pw').value = '';
+    _g('lv-pw').focus();
+  }
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+(function() {
+  if (sessionStorage.getItem('lv_auth') === '1') {
+    _g('login-gate').classList.add('hidden');
+  }
+  const d  = new Date();
+  const dd = String(d.getDate()).padStart(2,'0');
+  const mm = String(d.getMonth()+1).padStart(2,'0');
+  const yy = d.getFullYear();
+  _g('lv-date').value = `${dd}/${mm}/${yy}`;
+  _g('lv-date').addEventListener('input', function() { _autoFormatDate(this); });
+  const pw = _g('lv-pw');
+  if (pw) pw.addEventListener('keydown', e => { if (e.key==='Enter') doLogin(); });
+
+  // Setup swipe zone after DOM ready
+  const zone = _g('swipe-zone');
+  if (zone) {
+    zone.style.pointerEvents = 'auto';
+    let sx0 = null;
+    zone.addEventListener('touchstart', e => { sx0 = e.touches[0].clientX; }, {passive:true});
+    zone.addEventListener('touchmove', e => {
+      if (sx0 === null) return;
+      const dx = e.touches[0].clientX - sx0;
+      if (ST.sessionStart !== null) {
+        const nowSec = (Date.now() - ST.sessionStart) / 1000;
+        const maxBack = Math.max(0, nowSec - 40);
+        _xOffset = Math.max(0, Math.min(maxBack, _xOffset - dx * 0.05));
+        sx0 = e.touches[0].clientX;
+        _drawTrace();
+        _updateXAxis();
+      }
+    }, {passive:true});
+    zone.addEventListener('touchend', () => { sx0 = null; });
+  }
+})();
+</script>
+</body>
+</html>
