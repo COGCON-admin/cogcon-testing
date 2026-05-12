@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#1F3864">
+<title>COGCON® Live Assessment</title>
+<style>
+:root {
+  --navy:#1F3864; --navy2:#28508F;
+  --green:#27AE60; --green2:#1E8449;
+  --red:#C0392B;
+  --white:#FFF; --offwhite:#F0F3F8;
+  --g100:#F5F7FA; --g200:#E0E6F0; --g400:#9BACC4; --g700:#4A5568; --g900:#1A202C;
+  --coh-hi:#00C896; --coh-mid:#FFA500; --coh-amb:#FF8C00; --coh-lo:#FF4444;
+  --bg-dark:#0D1B2A;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;font-family:-apple-system,"Helvetica Neue",Arial,sans-serif;background:var(--offwhite);color:var(--g900);overflow:hidden}
+
+.screen{display:none;height:100vh;width:100vw;position:absolute;top:0;left:0;flex-direction:column;overflow-y:auto;overflow-x:hidden}
+.screen.active{display:flex}
+
+/* ── HEADER ── */
+.hdr{background:var(--navy);padding:12px 18px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+.hdr-wordmark{color:#fff;font-size:20px;font-weight:900;letter-spacing:.04em}
+.hdr-wordmark sup{font-size:.55em;vertical-align:super}
+.hdr-title{color:rgba(255,255,255,.7);font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+
+/* ── LAYOUT ── */
+.content{flex:1;padding:20px;overflow-y:auto;padding-bottom:calc(20px + env(safe-area-inset-bottom))}
+.centered{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100%}
+
+.card{background:#fff;border-radius:14px;padding:22px;box-shadow:0 2px 12px rgba(0,0,0,.08);width:100%;max-width:600px;margin:0 auto}
+.card+.card{margin-top:14px}
+
+h2{font-size:20px;font-weight:700;color:var(--navy);margin-bottom:14px}
+p{font-size:15px;line-height:1.6;color:var(--g700)}
+.sub{font-size:13px;color:var(--g400);margin-top:4px}
+
+.fg{margin-bottom:17px}
+.fg label{display:block;font-size:11px;font-weight:700;color:var(--navy);margin-bottom:5px;letter-spacing:.06em;text-transform:uppercase}
+.fc{width:100%;padding:13px 15px;font-size:17px;border:2px solid var(--g200);border-radius:9px;background:var(--g100);color:var(--g900);transition:border .2s;-webkit-appearance:none;font-family:inherit}
+.fc:focus{outline:none;border-color:var(--navy);background:#fff}
+@media(max-width:768px){.fc{font-size:16px}}
+
+.btn{display:block;width:100%;padding:17px 22px;font-size:17px;font-weight:700;border:none;border-radius:10px;cursor:pointer;text-align:center;letter-spacing:.02em;transition:all .15s;touch-action:manipulation;font-family:inherit}
+.btn:active{transform:scale(.98)}
+.btn+.btn{margin-top:11px}
+.btn-navy{background:var(--navy);color:#fff}
+.btn-navy:hover{background:var(--navy2)}
+.btn-outline{background:transparent;border:2px solid var(--navy);color:var(--navy)}
+.btn:disabled{opacity:.35;cursor:not-allowed;transform:none}
+
+/* ── TOGGLE SWITCH ── */
+.toggle-row{display:flex;align-items:center;justify-content:space-between}
+.toggle-sw{position:relative;display:inline-block;width:52px;height:30px;flex-shrink:0}
+.toggle-sw input{opacity:0;width:0;height:0;position:absolute}
+.toggle-slider{position:absolute;inset:0;background:var(--g200);border-radius:30px;transition:.25s;cursor:pointer}
+.toggle-slider:before{content:'';position:absolute;width:22px;height:22px;left:4px;bottom:4px;background:#fff;border-radius:50%;transition:.25s;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+.toggle-sw input:checked+.toggle-slider{background:var(--green)}
+.toggle-sw input:checked+.toggle-slider:before{transform:translateX(22px)}
+
+/* ── SUMMARY METRICS ── */
+.metric-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.metric-cell{background:var(--g100);border-radius:10px;padding:14px}
+.metric-cell-lbl{font-size:10px;font-weight:700;color:var(--g400);letter-spacing:.07em;text-transform:uppercase;margin-bottom:4px}
+.metric-cell-val{font-size:28px;font-weight:900;color:var(--navy);font-variant-numeric:tabular-nums}
+.metric-cell-unit{font-size:12px;color:var(--g400);font-weight:400;margin-left:2px}
+
+.band-row{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:12px}
+.band-cell{border-radius:7px;padding:10px 4px;text-align:center}
+.band-val{font-size:18px;font-weight:900;color:#fff}
+.band-lbl{font-size:9px;font-weight:700;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.05em;margin-top:3px}
+
+/* ── LOGIN GATE ── */
+#login-gate{position:fixed;inset:0;background:var(--offwhite);z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px}
+#login-gate.hidden{display:none}
+.login-box{background:#fff;border-radius:18px;padding:40px 32px;box-shadow:0 4px 24px rgba(0,0,0,.10);width:100%;max-width:380px;text-align:center}
+.login-title{font-size:28px;font-weight:900;color:var(--navy);letter-spacing:.03em;margin-bottom:4px}
+.login-sub{font-size:13px;color:var(--g400);margin-bottom:28px;letter-spacing:.04em;text-transform:uppercase;font-weight:600}
+.login-err{font-size:14px;color:var(--red);font-weight:600;margin-top:12px;min-height:20px}
+
+/* ── LIVE SCREEN ── */
+#screen-live{background:var(--bg-dark);overflow:hidden}
+
+#cam-visible{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1;display:none}
+
+.live-frame{position:absolute;inset:0;border:6px solid rgba(0,200,150,.55);z-index:10;pointer-events:none;border-radius:2px}
+
+.live-sidebar{position:absolute;left:14px;top:14px;bottom:76px;width:152px;background:rgba(0,0,0,.45);border-radius:10px;z-index:20;display:flex;flex-direction:column;padding:8px;gap:5px}
+.sidebar-lbl{font-size:10px;font-weight:700;color:rgba(255,255,255,.38);text-transform:uppercase;letter-spacing:.07em;text-align:center;flex-shrink:0}
+#hr-trace-canvas{display:block;flex:1;width:100%;min-height:0;border-radius:4px}
+
+.seb-bar{height:28px;flex-shrink:0;border-radius:7px;background:rgba(255,255,255,.07);display:flex;align-items:center;justify-content:center;gap:5px;transition:background .5s}
+.seb-bar.active{background:var(--coh-hi);animation:sebPulse 2s ease-in-out infinite}
+@keyframes sebPulse{0%,100%{opacity:1}50%{opacity:.55}}
+.seb-lbl{font-size:11px;font-weight:800;color:rgba(255,255,255,.45);letter-spacing:.1em}
+.seb-bar.active .seb-lbl{color:#fff}
+
+.live-bottom{position:absolute;bottom:0;left:0;right:0;height:68px;padding:0 16px;padding-bottom:max(0px,env(safe-area-inset-bottom));background:rgba(0,0,0,.72);z-index:20;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-shrink:0}
+.rec-dot{font-size:13px;font-weight:700;color:#fff;min-width:64px;flex-shrink:0}
+.rec-dot.recording{color:var(--coh-lo);animation:recPulse 1.5s ease-in-out infinite}
+@keyframes recPulse{0%,100%{opacity:1}50%{opacity:.2}}
+
+.bottom-controls{display:flex;align-items:center;gap:8px}
+.ctrl-btn{padding:8px 14px;font-size:13px;font-weight:700;border-radius:8px;border:none;cursor:pointer;font-family:inherit;touch-action:manipulation;transition:opacity .15s}
+.ctrl-btn:active{opacity:.7}
+.ctrl-stop{background:var(--red);color:#fff}
+.ctrl-mode{background:rgba(255,255,255,.15);color:#fff;font-size:17px;padding:8px 12px}
+
+.live-readouts{display:flex;gap:20px;align-items:flex-end}
+.readout-block{text-align:center}
+.readout-lbl{display:block;font-size:10px;font-weight:700;color:rgba(255,255,255,.5);letter-spacing:.07em;text-transform:uppercase;margin-bottom:1px}
+.readout-val{font-size:52px;font-weight:900;color:#fff;font-variant-numeric:tabular-nums;line-height:1;display:block;transition:color .4s}
+.readout-unit{display:block;font-size:10px;color:rgba(255,255,255,.42);margin-top:1px}
+
+@media(min-width:768px){.content{padding:28px;padding-bottom:calc(28px + env(safe-area-inset-bottom))}}
+</style>
+</head>
+<body>
+
+<!-- ══ LOGIN GATE ══ -->
+<div id="login-gate">
+  <div class="login-box">
+    <div class="login-title">COGCON<sup>®</sup></div>
+    <div class="login-sub">Live Assessment</div>
+    <div class="fg">
+      <label for="lv-pw">Password</label>
+      <input id="lv-pw" class="fc" type="password" placeholder="Enter password"
+             autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="btn btn-navy" onclick="doLogin()">Login</button>
+    <div class="login-err" id="login-err"></div>
+  </div>
+</div>
+
+<!-- ══ SCREEN 1: SETUP ══ -->
+<div id="screen-setup" class="screen active">
+  <div class="hdr">
+    <span class="hdr-wordmark">COGCON<sup>®</sup></span>
+    <span class="hdr-title">Live Assessment</span>
+  </div>
+  <div class="content centered">
+
+    <div class="card">
+      <h2>Session Setup</h2>
+      <div class="fg">
+        <label>Candidate Name</label>
+        <input type="text" class="fc" id="lv-name" autocapitalize="words" autocomplete="off">
+      </div>
+      <div class="fg">
+        <label>Organisation / Unit</label>
+        <input type="text" class="fc" id="lv-org" autocomplete="off">
+      </div>
+      <div class="fg">
+        <label>Assessor Name</label>
+        <input type="text" class="fc" id="lv-assessor" autocapitalize="words" autocomplete="off">
+      </div>
+      <div class="fg" style="margin-bottom:0">
+        <label>Date (DD/MM/YYYY)</label>
+        <input type="text" class="fc" id="lv-date" placeholder="DD/MM/YYYY" maxlength="10" inputmode="numeric">
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="toggle-row">
+        <span style="font-size:15px;font-weight:600;color:var(--navy)">Record Video</span>
+        <label class="toggle-sw">
+          <input type="checkbox" id="toggle-record" checked onchange="LV.onRecordToggle(this.checked)">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <p class="sub" id="record-note" style="display:none;margin-top:8px">
+        Live monitoring only — CSV data still captured
+      </p>
+    </div>
+
+    <button class="btn btn-outline" id="btn-strap" onclick="BLE.connect()"
+            style="max-width:600px">Connect Strap</button>
+    <button class="btn btn-navy" onclick="LV.startSession()"
+            style="max-width:600px">&#9654; Start Session</button>
+
+  </div>
+</div>
+
+<!-- ══ SCREEN 2: LIVE ══ -->
+<div id="screen-live" class="screen">
+  <video id="cam-visible" autoplay muted playsinline></video>
+  <div class="live-frame"></div>
+
+  <div class="live-sidebar">
+    <span class="sidebar-lbl">HR Trace</span>
+    <canvas id="hr-trace-canvas"></canvas>
+    <div class="seb-bar" id="seb-bar">
+      <span class="seb-lbl">SEB</span>
+    </div>
+  </div>
+
+  <div class="live-bottom">
+    <span class="rec-dot" id="rec-dot">&#9711; LIVE</span>
+    <div class="bottom-controls">
+      <button class="ctrl-btn ctrl-mode" id="btn-mode" onclick="LV.toggleTraceMode()"
+              title="Toggle light/dark trace colours">&#9788;</button>
+      <button class="ctrl-btn ctrl-stop" onclick="LV.stopSession()">&#9632; Stop</button>
+    </div>
+    <div class="live-readouts">
+      <div class="readout-block">
+        <span class="readout-lbl">HR</span>
+        <span class="readout-val" id="lv-hr">---</span>
+        <span class="readout-unit">BPM</span>
+      </div>
+      <div class="readout-block">
+        <span class="readout-lbl">EPOC</span>
+        <span class="readout-val" id="lv-epoc">--.-</span>
+        <span class="readout-unit">ml/kg</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCREEN 3: SUMMARY ══ -->
+<div id="screen-summary" class="screen">
+  <div class="hdr">
+    <span class="hdr-wordmark">COGCON<sup>®</sup></span>
+    <span class="hdr-title">Session Summary</span>
+  </div>
+  <div class="content centered">
+
+    <div class="card">
+      <h2>Session Complete</h2>
+      <p class="sub" id="sum-meta" style="margin-bottom:16px"></p>
+      <div class="metric-grid">
+        <div class="metric-cell">
+          <div class="metric-cell-lbl">Duration</div>
+          <div class="metric-cell-val" id="sum-dur">—</div>
+        </div>
+        <div class="metric-cell">
+          <div class="metric-cell-lbl">Avg HR</div>
+          <div class="metric-cell-val" id="sum-hr">—</div>
+        </div>
+        <div class="metric-cell">
+          <div class="metric-cell-lbl">Peak EPOC</div>
+          <div class="metric-cell-val" id="sum-epoc">—</div>
+        </div>
+        <div class="metric-cell">
+          <div class="metric-cell-lbl">Avg Coherence</div>
+          <div class="metric-cell-val" id="sum-coh">—</div>
+        </div>
+      </div>
+      <p style="font-size:11px;font-weight:700;color:var(--g400);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">
+        Time in Coherence Band
+      </p>
+      <div class="band-row">
+        <div class="band-cell" style="background:var(--coh-hi)">
+          <div class="band-val" id="sum-hi">—</div>
+          <div class="band-lbl">&gt;70%</div>
+        </div>
+        <div class="band-cell" style="background:var(--coh-mid)">
+          <div class="band-val" id="sum-mid">—</div>
+          <div class="band-lbl">40–70%</div>
+        </div>
+        <div class="band-cell" style="background:var(--coh-amb)">
+          <div class="band-val" id="sum-amb">—</div>
+          <div class="band-lbl">20–40%</div>
+        </div>
+        <div class="band-cell" style="background:var(--coh-lo)">
+          <div class="band-val" id="sum-lo">—</div>
+          <div class="band-lbl">&lt;20%</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="width:100%;max-width:600px">
+      <button class="btn btn-navy" id="btn-dl-video" onclick="LV.downloadVideo()"
+              style="display:none">&#11015; Download Video (.webm)</button>
+      <button class="btn btn-outline" onclick="LV.downloadCSV()">&#11015; Download CSV</button>
+      <button class="btn btn-outline" onclick="LV.newSession()" style="margin-top:8px">&#8592; New Session</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- Hidden recording elements -->
+<video id="cam-feed" autoplay muted playsinline
+       style="display:none;position:absolute;top:-9999px;left:-9999px"></video>
+<canvas id="rec-canvas"
+        style="display:none;position:absolute;top:-9999px;left:-9999px"></canvas>
+
+<script>
+'use strict';
+
+// ── SESSION STATE ─────────────────────────────────────────────────────────────
+const ST = {
+  name: '', org: '', assessor: '', date: '',
+  recordVideo: true,
+  darkTrace: true,
+  sessionStart: null,
+  sessionEnd: null,
+  hrLog: [],      // [{ts, hr, coh}] — one entry per second
+  peakEpoc: 0
+};
+
+// ── BLE — Bluetooth HR strap ──────────────────────────────────────────────────
+const BLE = {
+  hr: null,
+  rrBuffer: [],
+  coherence: 0,
+  device: null,
+  char: null,
+  connected: false,
+
+  async connect() {
+    if (!navigator.bluetooth) {
+      alert('Web Bluetooth is not supported in this browser.\nPlease use Chrome or Edge on desktop or Android.');
+      return;
+    }
+    try {
+      this.device = await navigator.bluetooth.requestDevice({
+        filters: [{ services: ['heart_rate'] }]
+      });
+      const server = await this.device.gatt.connect();
+      const svc    = await server.getPrimaryService('heart_rate');
+      this.char    = await svc.getCharacteristic('heart_rate_measurement');
+      await this.char.startNotifications();
+      this.char.addEventListener('characteristicvaluechanged', e => BLE.onData(e));
+      this.connected = true;
+      this.device.addEventListener('gattserverdisconnected', () => BLE.onDisconnect());
+      const btn = _g('btn-strap');
+      if (btn) {
+        btn.textContent = '✓ Strap Connected';
+        btn.disabled = true;
+        btn.style.borderColor = '#27AE60';
+        btn.style.color = '#27AE60';
+      }
+    } catch(e) {
+      if (e.name !== 'NotFoundError') alert('Strap connection failed:\n' + e.message);
+    }
+  },
+
+  onData(event) {
+    const v     = event.target.value;
+    const flags = v.getUint8(0);
+    const hr16  = flags & 0x01;
+    this.hr     = hr16 ? v.getUint16(1, true) : v.getUint8(1);
+    // RR intervals present when bit 4 of flags is set
+    if (flags & 0x10) {
+      let off = hr16 ? 3 : 2;
+      while (off + 1 < v.byteLength) {
+        const rr = v.getUint16(off, true) / 1024 * 1000; // 1/1024 s → ms
+        this.rrBuffer.push(rr);
+        if (this.rrBuffer.length > 128) this.rrBuffer.shift();
+        off += 2;
+      }
+    }
+    this.coherence = _calcCoherence(this.rrBuffer);
+  },
+
+  onDisconnect() {
+    this.connected = false;
+    const btn = _g('btn-strap');
+    if (btn) {
+      btn.textContent = 'Connect Strap';
+      btn.disabled = false;
+      btn.style.borderColor = '';
+      btn.style.color = '';
+    }
+  }
+};
+
+// ── COHERENCE — peak LF power / total power via DFT ──────────────────────────
+function _calcCoherence(rrBuf) {
+  if (rrBuf.length < 16) return 0;
+  const N       = Math.min(rrBuf.length, 64);
+  const buf     = rrBuf.slice(-N);
+  const totalMs = buf.reduce((a, b) => a + b, 0);
+  const sr      = 4; // Hz interpolation rate
+  const nSamp   = Math.round(totalMs / 1000 * sr);
+  if (nSamp < 8) return 0;
+
+  // Interpolate RR series onto even 4 Hz grid
+  const signal = [];
+  let t = 0, tNext = buf[0], bi = 0;
+  for (let i = 0; i < nSamp; i++) {
+    const tgt = i / sr * 1000;
+    while (bi < buf.length - 1 && tNext <= tgt) { bi++; t = tNext; tNext += buf[bi]; }
+    const span = buf[bi] > 0 ? buf[bi] : 1;
+    const frac = Math.max(0, Math.min(1, (tgt - t) / span));
+    const prev = bi > 0 ? buf[bi - 1] : buf[0];
+    signal.push(prev + frac * (buf[bi] - prev));
+  }
+
+  const mean = signal.reduce((a, b) => a + b, 0) / signal.length;
+  const sig  = signal.map(x => x - mean);
+
+  let totalPow = 0, lfPeak = 0;
+  for (let k = 1; k <= 30; k++) {
+    const f = k * 0.02; // 0.02 … 0.60 Hz
+    let re = 0, im = 0;
+    for (let i = 0; i < sig.length; i++) {
+      const a = 2 * Math.PI * f * i / sr;
+      re += sig[i] * Math.cos(a);
+      im -= sig[i] * Math.sin(a);
+    }
+    const p = re * re + im * im;
+    totalPow += p;
+    if (f >= 0.04 && f <= 0.26 && p > lfPeak) lfPeak = p;
+  }
+  if (totalPow === 0) return 0;
+  return Math.min(100, Math.round(lfPeak / totalPow * 100 * 3.5));
+}
+
+// ── COHERENCE COLOUR ──────────────────────────────────────────────────────────
+function _cohColour(coh) {
+  if (coh > 70)  return ST.darkTrace ? '#00C896' : '#FFD700';
+  if (coh >= 40) return '#FFA500';
+  if (coh >= 20) return '#FF8C00';
+  return '#FF4444';
+}
+
+// ── EPOC ACCUMULATION ─────────────────────────────────────────────────────────
+let _epoc = 0, _epocRest = 60;
+function _updateEpoc(hr) {
+  _epoc += Math.max(0, hr - _epocRest) * (1 / 60) * 0.1; // ml/kg per second
+}
+
+// ── HR TRACE BUFFER ───────────────────────────────────────────────────────────
+const TRACE_MAX = 120;
+let _trace = []; // [{hr, coh}]
+
+// ── HR TRACE CANVAS ───────────────────────────────────────────────────────────
+function _drawTrace() {
+  const canvas = _g('hr-trace-canvas');
+  if (!canvas) return;
+  const W = canvas.offsetWidth, H = canvas.offsetHeight;
+  if (!W || !H) return;
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, W, H);
+  if (_trace.length < 2) return;
+  const step = W / (TRACE_MAX - 1);
+  const si   = Math.max(0, _trace.length - TRACE_MAX);
+  ctx.lineWidth = 2; ctx.lineJoin = 'round';
+  for (let i = si + 1; i < _trace.length; i++) {
+    const xi  = (i - si - 1) * step;
+    const xi1 = (i - si) * step;
+    const y0  = H - ((_trace[i - 1].hr - 40) / 140) * (H - 10) - 5;
+    const y1  = H - ((_trace[i].hr - 40) / 140) * (H - 10) - 5;
+    ctx.beginPath();
+    ctx.moveTo(xi, y0);
+    ctx.lineTo(xi1, y1);
+    ctx.strokeStyle = _cohColour(_trace[i].coh);
+    ctx.stroke();
+  }
+}
+
+// ── RECORDING CANVAS OVERLAY ──────────────────────────────────────────────────
+function _drawRecordOverlay(ctx, W, H) {
+  // COGCON® branded teal perimeter
+  ctx.save();
+  ctx.strokeStyle = 'rgba(0,200,150,.58)';
+  ctx.lineWidth = 6;
+  ctx.strokeRect(3, 3, W - 6, H - 6);
+  // COGCON® wordmark top-left
+  const fs = Math.max(14, Math.round(W * 0.018));
+  ctx.fillStyle = 'rgba(0,200,150,.75)';
+  ctx.font = `900 ${fs}px -apple-system,Arial,sans-serif`;
+  ctx.textAlign = 'left';
+  ctx.fillText('COGCON® LIVE', 16, 16 + fs);
+  ctx.restore();
+
+  // Left sidebar background
+  const sW = Math.round(W * 0.12);
+  const sH = Math.round(H * 0.55);
+  const sX = 14;
+  const sY = Math.round((H - sH) * 0.38);
+  ctx.save();
+  ctx.fillStyle = 'rgba(0,0,0,.42)';
+  ctx.beginPath();
+  ctx.rect(sX, sY, sW, sH);
+  ctx.fill();
+
+  // HR trace in sidebar
+  if (_trace.length >= 2) {
+    const step = sW / (TRACE_MAX - 1);
+    const si   = Math.max(0, _trace.length - TRACE_MAX);
+    ctx.lineWidth = 2;
+    for (let i = si + 1; i < _trace.length; i++) {
+      const xi  = sX + (i - si - 1) * step;
+      const xi1 = sX + (i - si) * step;
+      const y0  = sY + sH - ((_trace[i - 1].hr - 40) / 140) * (sH - 8) - 4;
+      const y1  = sY + sH - ((_trace[i].hr - 40) / 140) * (sH - 8) - 4;
+      ctx.beginPath();
+      ctx.moveTo(xi, y0);
+      ctx.lineTo(xi1, y1);
+      ctx.strokeStyle = _cohColour(_trace[i].coh);
+      ctx.stroke();
+    }
+  }
+
+  // SEB indicator in sidebar (green band at bottom of sidebar when coherence < 40%)
+  if (BLE.coherence < 40 && BLE.hr !== null) {
+    ctx.fillStyle = '#00C896';
+    ctx.fillRect(sX, sY + sH + 4, sW, Math.round(H * 0.025));
+  }
+  ctx.restore();
+
+  // Bottom-right: HR + EPOC readouts
+  const hr  = BLE.hr;
+  const coh = BLE.coherence;
+  ctx.save();
+  ctx.textAlign = 'right';
+  const bX     = W - 20;
+  const bY     = H - 16;
+  const lblSz  = Math.max(12, Math.round(W * 0.012));
+  const valSz  = Math.max(36, Math.round(W * 0.05));
+  const unitSz = Math.max(10, Math.round(W * 0.011));
+  const font   = '-apple-system,Arial,sans-serif';
+  const g1 = Math.round(H * 0.08);
+  const g2 = Math.round(H * 0.012);
+  const g3 = Math.round(H * 0.023);
+
+  // EPOC
+  ctx.fillStyle = 'rgba(255,255,255,.48)';
+  ctx.font = `700 ${lblSz}px ${font}`;
+  ctx.fillText('EPOC', bX, bY - g1);
+  ctx.fillStyle = '#ffffff';
+  ctx.font = `900 ${valSz}px ${font}`;
+  ctx.fillText(hr !== null ? _epoc.toFixed(1) : '--.-', bX, bY - g2);
+  ctx.fillStyle = 'rgba(255,255,255,.42)';
+  ctx.font = `700 ${unitSz}px ${font}`;
+  ctx.fillText('ml/kg', bX, bY + g3);
+
+  // HR
+  const hrX = bX - Math.round(W * 0.11);
+  ctx.fillStyle = 'rgba(255,255,255,.48)';
+  ctx.font = `700 ${lblSz}px ${font}`;
+  ctx.fillText('HR', hrX, bY - g1);
+  ctx.fillStyle = hr !== null ? _cohColour(coh) : '#ffffff';
+  ctx.font = `900 ${valSz}px ${font}`;
+  ctx.fillText(hr !== null ? String(hr) : '---', hrX, bY - g2);
+  ctx.fillStyle = 'rgba(255,255,255,.42)';
+  ctx.font = `700 ${unitSz}px ${font}`;
+  ctx.fillText('BPM', hrX, bY + g3);
+  ctx.restore();
+}
+
+// ── CAMERA + MEDIARECORDER ────────────────────────────────────────────────────
+let _camStream = null, _recorder = null, _recChunks = [], _rafId = null;
+
+async function _startCamera() {
+  try {
+    _camStream = await navigator.mediaDevices.getUserMedia(
+      { video: { facingMode: 'environment' }, audio: false }
+    );
+  } catch(e) {
+    try {
+      _camStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+    } catch(e2) {
+      console.warn('Camera unavailable:', e2.message);
+      _camStream = null;
+      return;
+    }
+  }
+
+  // Show camera feed visually on live screen
+  const vis = _g('cam-visible');
+  vis.srcObject = _camStream;
+  vis.style.display = 'block';
+  await vis.play().catch(() => {});
+
+  // Hidden feed for recording canvas compositor
+  const hid = _g('cam-feed');
+  hid.srcObject = _camStream;
+  await hid.play().catch(() => {});
+
+  // Set up recording canvas
+  const canvas = _g('rec-canvas');
+  const dpr    = window.devicePixelRatio || 1;
+  canvas.width  = Math.round(window.screen.width  * dpr);
+  canvas.height = Math.round(window.screen.height * dpr);
+  const ctx = canvas.getContext('2d');
+  _recChunks = [];
+
+  (function frame() {
+    if (!_camStream) return;
+    const W = canvas.width, H = canvas.height;
+    ctx.drawImage(hid, 0, 0, W, H);
+    _drawRecordOverlay(ctx, W, H);
+    _rafId = requestAnimationFrame(frame);
+  })();
+
+  const mime = ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm']
+    .find(t => MediaRecorder.isTypeSupported(t)) || '';
+  _recorder = new MediaRecorder(canvas.captureStream(30), mime ? { mimeType: mime } : {});
+  _recorder.ondataavailable = e => { if (e.data && e.data.size > 0) _recChunks.push(e.data); };
+  _recorder.start(1000);
+}
+
+function _stopCamera() {
+  if (_rafId) { cancelAnimationFrame(_rafId); _rafId = null; }
+  if (_recorder && _recorder.state !== 'inactive') _recorder.stop();
+  if (_camStream) { _camStream.getTracks().forEach(t => t.stop()); _camStream = null; }
+  const vis = _g('cam-visible');
+  if (vis) { vis.srcObject = null; vis.style.display = 'none'; }
+}
+
+// ── LIVE UPDATE LOOP (1 s) ────────────────────────────────────────────────────
+let _liveTimer = null;
+
+function _startLoop() {
+  _epoc     = 0;
+  _epocRest = 60;
+  _trace    = [];
+
+  _liveTimer = setInterval(() => {
+    const hr  = BLE.hr;
+    const coh = BLE.coherence;
+
+    if (hr !== null) {
+      _trace.push({ hr, coh });
+      if (_trace.length > TRACE_MAX) _trace.shift();
+      _updateEpoc(hr);
+      ST.hrLog.push({ ts: Date.now(), hr, coh });
+      if (_epoc > ST.peakEpoc) ST.peakEpoc = _epoc;
+    }
+
+    // HR readout
+    const hrEl = _g('lv-hr');
+    if (hrEl) {
+      hrEl.textContent = hr !== null ? hr : '---';
+      hrEl.style.color = hr !== null ? _cohColour(coh) : '#ffffff';
+    }
+
+    // EPOC readout
+    const epocEl = _g('lv-epoc');
+    if (epocEl) epocEl.textContent = _epoc.toFixed(1);
+
+    // SEB bar — green when coherence < 40%
+    const seb = _g('seb-bar');
+    if (seb) seb.classList.toggle('active', hr !== null && coh < 40);
+
+    _drawTrace();
+  }, 1000);
+}
+
+function _stopLoop() {
+  if (_liveTimer) { clearInterval(_liveTimer); _liveTimer = null; }
+}
+
+// ── APP CONTROLLER ────────────────────────────────────────────────────────────
+const LV = {
+
+  onRecordToggle(on) {
+    ST.recordVideo = on;
+    const note = _g('record-note');
+    if (note) note.style.display = on ? 'none' : '';
+  },
+
+  async startSession() {
+    const name     = _g('lv-name').value.trim();
+    const org      = _g('lv-org').value.trim();
+    const assessor = _g('lv-assessor').value.trim();
+    const date     = _g('lv-date').value.trim();
+    if (!name) { alert('Enter candidate name.'); return; }
+    if (!org)  { alert('Enter organisation.'); return; }
+    if (!date || !/^\d{2}\/\d{2}\/\d{4}$/.test(date)) {
+      alert('Enter date in DD/MM/YYYY format.'); return;
+    }
+    Object.assign(ST, {
+      name, org, assessor, date,
+      sessionStart: Date.now(), sessionEnd: null,
+      hrLog: [], peakEpoc: 0
+    });
+
+    _showScreen('live');
+
+    // REC / LIVE indicator
+    const dot = _g('rec-dot');
+    if (ST.recordVideo) {
+      if (dot) { dot.innerHTML = '&#9679; REC'; dot.classList.add('recording'); }
+      await _startCamera();
+    } else {
+      if (dot) { dot.innerHTML = '&#9711; LIVE'; dot.classList.remove('recording'); }
+    }
+
+    _startLoop();
+  },
+
+  stopSession() {
+    ST.sessionEnd = Date.now();
+    _stopLoop();
+    if (ST.recordVideo) _stopCamera();
+    this._buildSummary();
+    _showScreen('summary');
+  },
+
+  toggleTraceMode() {
+    ST.darkTrace = !ST.darkTrace;
+    const btn = _g('btn-mode');
+    if (btn) btn.innerHTML = ST.darkTrace ? '&#9788;' : '&#9790;';
+  },
+
+  _buildSummary() {
+    const log  = ST.hrLog;
+    const dur  = Math.round(((ST.sessionEnd || Date.now()) - ST.sessionStart) / 1000);
+    const mins = Math.floor(dur / 60);
+    const secs = dur % 60;
+    _g('sum-dur').textContent = `${mins}:${String(secs).padStart(2, '0')}`;
+    _g('sum-meta').textContent = `${ST.name} · ${ST.org} · ${ST.date}`;
+
+    if (log.length === 0) {
+      ['sum-hr','sum-epoc','sum-coh','sum-hi','sum-mid','sum-amb','sum-lo']
+        .forEach(id => { const el = _g(id); if (el) el.textContent = '—'; });
+      const vbtn = _g('btn-dl-video');
+      if (vbtn) vbtn.style.display = 'none';
+      return;
+    }
+
+    const hrs  = log.map(e => e.hr);
+    const cohs = log.map(e => e.coh);
+    const n    = cohs.length;
+
+    const avgHr  = Math.round(hrs.reduce((a,b) => a+b, 0) / hrs.length);
+    const avgCoh = Math.round(cohs.reduce((a,b) => a+b, 0) / n);
+    const pct    = k => n > 0 ? Math.round(k / n * 100) + '%' : '—';
+
+    _g('sum-hr').innerHTML   = avgHr + '<span class="metric-cell-unit">bpm</span>';
+    _g('sum-epoc').innerHTML = ST.peakEpoc.toFixed(1) + '<span class="metric-cell-unit">ml/kg</span>';
+    _g('sum-coh').innerHTML  = avgCoh + '<span class="metric-cell-unit">%</span>';
+    _g('sum-hi').textContent  = pct(cohs.filter(c => c > 70).length);
+    _g('sum-mid').textContent = pct(cohs.filter(c => c >= 40 && c <= 70).length);
+    _g('sum-amb').textContent = pct(cohs.filter(c => c >= 20 && c < 40).length);
+    _g('sum-lo').textContent  = pct(cohs.filter(c => c < 20).length);
+
+    const vbtn = _g('btn-dl-video');
+    if (vbtn) vbtn.style.display = ST.recordVideo ? '' : 'none';
+  },
+
+  downloadVideo() {
+    if (!_recChunks.length) { alert('No video data captured.'); return; }
+    const blob = new Blob(_recChunks, { type: 'video/webm' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = 'COGCON_LIVE_'
+               + (ST.name.replace(/\s+/g, '_') || 'Session')
+               + '_' + (ST.date.replace(/\//g, '-') || 'date')
+               + '.webm';
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+  },
+
+  downloadCSV() {
+    const log  = ST.hrLog;
+    const dur  = ST.sessionEnd ? Math.round((ST.sessionEnd - ST.sessionStart) / 1000) : 0;
+    const hrs  = log.map(e => e.hr);
+    const cohs = log.map(e => e.coh);
+    const n    = cohs.length;
+    const avg  = arr => arr.length ? Math.round(arr.reduce((a,b) => a+b,0) / arr.length) : '';
+    const pct  = k   => n > 0 ? (k / n * 100).toFixed(1) : '';
+
+    const rows = [
+      ['candidate_name','organisation','assessor','date','duration_seconds',
+       'avg_hr_bpm','min_hr_bpm','max_hr_bpm',
+       'avg_coherence_pct','peak_epoc_mlkg',
+       'pct_time_gt70_coh','pct_time_40_70_coh',
+       'pct_time_20_40_coh','pct_time_lt20_coh',
+       'video_recorded'],
+      [ST.name, ST.org, ST.assessor, ST.date, dur,
+       avg(hrs),
+       hrs.length ? Math.min(...hrs) : '',
+       hrs.length ? Math.max(...hrs) : '',
+       avg(cohs),
+       ST.peakEpoc.toFixed(2),
+       pct(cohs.filter(c => c > 70).length),
+       pct(cohs.filter(c => c >= 40 && c <= 70).length),
+       pct(cohs.filter(c => c >= 20 && c < 40).length),
+       pct(cohs.filter(c => c < 20).length),
+       ST.recordVideo ? 'yes' : 'no']
+    ];
+
+    const csv = rows
+      .map(r => r.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(','))
+      .join('\n');
+    const a   = document.createElement('a');
+    a.href    = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+    a.download = 'COGCON_LIVE_'
+               + (ST.name.replace(/\s+/g, '_') || 'Session')
+               + '_' + (ST.date.replace(/\//g, '-') || 'date')
+               + '.csv';
+    a.click();
+  },
+
+  newSession() {
+    _stopLoop();
+    _stopCamera();
+    Object.assign(ST, {
+      name: '', org: '', assessor: '', date: '',
+      recordVideo: true, darkTrace: true,
+      sessionStart: null, sessionEnd: null,
+      hrLog: [], peakEpoc: 0
+    });
+    _epoc = 0; _trace = []; _recChunks = [];
+    const tr = _g('toggle-record'); if (tr) tr.checked = true;
+    const rn = _g('record-note'); if (rn) rn.style.display = 'none';
+    const mb = _g('btn-mode'); if (mb) mb.innerHTML = '&#9788;';
+    ['lv-name','lv-org','lv-assessor'].forEach(id => {
+      const el = _g(id); if (el) el.value = '';
+    });
+    _showScreen('setup');
+  }
+};
+
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+function _g(id) { return document.getElementById(id); }
+
+function _showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  _g('screen-' + name).classList.add('active');
+}
+
+function _autoFormatDate(input) {
+  let v = input.value.replace(/\D/g, '');
+  if (v.length > 2) v = v.slice(0, 2) + '/' + v.slice(2);
+  if (v.length > 5) v = v.slice(0, 5) + '/' + v.slice(5);
+  input.value = v.slice(0, 10);
+}
+
+function doLogin() {
+  const val = _g('lv-pw').value;
+  if (val === 'COGCON2026') {
+    sessionStorage.setItem('lv_auth', '1');
+    _g('login-gate').classList.add('hidden');
+  } else {
+    _g('login-err').textContent = 'Invalid password';
+    _g('lv-pw').value = '';
+    _g('lv-pw').focus();
+  }
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+(function() {
+  // Auth gate
+  if (sessionStorage.getItem('lv_auth') === '1') {
+    _g('login-gate').classList.add('hidden');
+  }
+  // Auto-populate today's date
+  const d  = new Date();
+  const dd = String(d.getDate()).padStart(2, '0');
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const yy = d.getFullYear();
+  _g('lv-date').value = `${dd}/${mm}/${yy}`;
+  _g('lv-date').addEventListener('input', function() { _autoFormatDate(this); });
+  _g('lv-pw') && _g('lv-pw').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+})();
+</script>
+</body>
+</html>

@@ -703,6 +703,8 @@ class GNGEngine {
 
   _calc() {
     const recorded = this.responses.filter(r => r != null);
+    console.log('[GNG] pool size:', this.trials.length, '| recorded trials:', recorded.length, '| responses.length:', this.responses.length, '| currentTrial:', this.currentTrial);
+    console.log('[GNG] W recorded:', recorded.filter(r=>r.type==='W').length, 'hits:', recorded.filter(r=>r.type==='W'&&r.response==='GO').length, '| M recorded:', recorded.filter(r=>r.type==='M').length);
     let hits = 0, miss = 0, cr = 0, fa = 0, rtSum = 0, rtN = 0, bestRT = null;
     let wN = 0, mN = 0;
     recorded.forEach(r => {
