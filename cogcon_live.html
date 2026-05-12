@@ -12,54 +12,50 @@
   --navy:#1F3864; --navy2:#28508F;
   --green:#27AE60; --green2:#1E8449;
   --red:#C0392B;
-  --white:#FFF; --offwhite:#F0F3F8;
+  --offwhite:#F0F3F8;
   --g100:#F5F7FA; --g200:#E0E6F0; --g400:#9BACC4; --g700:#4A5568; --g900:#1A202C;
-  --coh-hi:#00C896; --coh-mid:#FFA500; --coh-amb:#FF8C00; --coh-lo:#FF4444;
+  --coh-hi:#00C896; --coh-amb:#FF8C00; --coh-lo:#FF4444;
   --bg-dark:#0D1B2A;
-  --top1-h:56px;   /* COGCON® brand / controls row */
-  --top2-h:38px;   /* REC status row */
-  --topbar-total:94px; /* top1 + top2 */
-  --readout-h:110px; /* HR+EPOC block height */
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;font-family:-apple-system,"Helvetica Neue",Arial,sans-serif;background:var(--offwhite);color:var(--g900);overflow:hidden}
 
-/* ── SCREENS ── */
+/* ── BASE SCREENS ── */
 .screen{display:none;height:100vh;width:100vw;position:absolute;top:0;left:0;flex-direction:column;overflow-y:auto;overflow-x:hidden}
 .screen.active{display:flex}
 
-/* ── SHARED HEADER (setup/summary screens) ── */
-.hdr{background:var(--navy);padding:12px 18px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,.25)}
-.hdr-wordmark{color:#fff;font-size:20px;font-weight:900;letter-spacing:.04em}
+/* ── SHARED HEADER ── */
+.hdr{background:var(--navy);padding:0 16px;height:52px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+.hdr-left{display:flex;align-items:center;gap:12px}
+.hdr-wordmark{color:#fff;font-size:19px;font-weight:900;letter-spacing:.04em;line-height:1}
 .hdr-wordmark sup{font-size:.55em;vertical-align:super}
 .hdr-title{color:rgba(255,255,255,.7);font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase}
-.hdr-right{display:flex;align-items:center;gap:8px}
-.hdr-btn{background:none;border:none;color:rgba(255,255,255,.7);font-size:19px;cursor:pointer;padding:6px 8px;line-height:1;touch-action:manipulation;border-radius:6px}
-.hdr-btn:hover{color:#fff;background:rgba(255,255,255,.1)}
+.hdr-info-btn{background:rgba(255,255,255,.15);border:none;color:#fff;font-size:18px;width:40px;height:40px;border-radius:50%;cursor:pointer;touch-action:manipulation;display:flex;align-items:center;justify-content:center;font-family:inherit;flex-shrink:0}
+.hdr-info-btn:active{background:rgba(255,255,255,.3)}
 
-/* ── LAYOUT ── */
+/* ── CONTENT ── */
 .content{flex:1;padding:20px;overflow-y:auto;padding-bottom:calc(20px + env(safe-area-inset-bottom))}
 .centered{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100%}
 .card{background:#fff;border-radius:14px;padding:22px;box-shadow:0 2px 12px rgba(0,0,0,.08);width:100%;max-width:600px;margin:0 auto}
 .card+.card{margin-top:14px}
 h2{font-size:20px;font-weight:700;color:var(--navy);margin-bottom:14px}
-h3{font-size:13px;font-weight:700;color:var(--navy);margin-bottom:8px}
 p{font-size:15px;line-height:1.6;color:var(--g700)}
 .sub{font-size:13px;color:var(--g400);margin-top:4px}
-
 .fg{margin-bottom:17px}
 .fg label{display:block;font-size:11px;font-weight:700;color:var(--navy);margin-bottom:5px;letter-spacing:.06em;text-transform:uppercase}
 .fc{width:100%;padding:13px 15px;font-size:17px;border:2px solid var(--g200);border-radius:9px;background:var(--g100);color:var(--g900);transition:border .2s;-webkit-appearance:none;font-family:inherit}
 .fc:focus{outline:none;border-color:var(--navy);background:#fff}
-@media(max-width:768px){.fc{font-size:16px}}
+@media(max-width:400px){.fc{font-size:16px;padding:11px 13px}}
 
-.btn{display:block;width:100%;padding:17px 22px;font-size:17px;font-weight:700;border:none;border-radius:10px;cursor:pointer;text-align:center;letter-spacing:.02em;transition:all .15s;touch-action:manipulation;font-family:inherit}
+/* ── BUTTONS ── */
+.btn{display:block;width:100%;padding:16px 22px;font-size:17px;font-weight:700;border:none;border-radius:10px;cursor:pointer;text-align:center;letter-spacing:.02em;transition:all .15s;touch-action:manipulation;font-family:inherit}
 .btn:active{transform:scale(.98)}
 .btn+.btn{margin-top:11px}
 .btn-navy{background:var(--navy);color:#fff}
 .btn-navy:hover{background:var(--navy2)}
 .btn-outline{background:transparent;border:2px solid var(--navy);color:var(--navy)}
 .btn:disabled{opacity:.35;cursor:not-allowed;transform:none}
+.btn-lg{font-size:18px;padding:18px 22px}
 
 /* ── TOGGLE SWITCH ── */
 .toggle-row{display:flex;align-items:center;justify-content:space-between}
@@ -70,104 +66,103 @@ p{font-size:15px;line-height:1.6;color:var(--g700)}
 .toggle-sw input:checked+.toggle-slider{background:var(--green)}
 .toggle-sw input:checked+.toggle-slider:before{transform:translateX(22px)}
 
-/* ── SUMMARY METRICS ── */
-.metric-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
-.metric-cell{background:var(--g100);border-radius:10px;padding:14px}
-.metric-cell-lbl{font-size:10px;font-weight:700;color:var(--g400);letter-spacing:.07em;text-transform:uppercase;margin-bottom:4px}
-.metric-cell-val{font-size:28px;font-weight:900;color:var(--navy);font-variant-numeric:tabular-nums}
-.metric-cell-unit{font-size:12px;color:var(--g400);font-weight:400;margin-left:2px}
-.band-row{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:12px}
-.band-cell{border-radius:7px;padding:10px 4px;text-align:center}
-.band-val{font-size:18px;font-weight:900;color:#fff}
-.band-lbl{font-size:9px;font-weight:700;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.05em;margin-top:3px}
-
 /* ── LOGIN GATE ── */
-#login-gate{position:fixed;inset:0;background:var(--offwhite);z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px}
+#login-gate{position:fixed;inset:0;background:var(--offwhite);z-index:99999;display:flex;align-items:center;justify-content:center;padding:24px}
 #login-gate.hidden{display:none}
 .login-box{background:#fff;border-radius:18px;padding:40px 32px;box-shadow:0 4px 24px rgba(0,0,0,.10);width:100%;max-width:380px;text-align:center}
 .login-title{font-size:28px;font-weight:900;color:var(--navy);letter-spacing:.03em;margin-bottom:4px}
 .login-sub{font-size:13px;color:var(--g400);margin-bottom:28px;letter-spacing:.04em;text-transform:uppercase;font-weight:600}
 .login-err{font-size:14px;color:var(--red);font-weight:600;margin-top:12px;min-height:20px}
 
-/* ══════════════════════════════════════════════════
-   LIVE SCREEN LAYOUT
-   All child elements positioned absolutely within
-   #screen-live (position:absolute, 100vw × 100vh)
-   ══════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════
+   LIVE SCREEN — all children position:fixed
+   Hidden automatically when #screen-live is display:none
+   ═══════════════════════════════════════════════════ */
 #screen-live{background:var(--bg-dark);overflow:hidden}
 
-/* Camera fill */
+/* Camera fill (below top bars) */
+#cam-area{
+  position:fixed;top:92px;left:0;right:0;bottom:0;
+  z-index:1;background:var(--bg-dark);overflow:hidden;
+}
 #cam-visible{
   position:absolute;inset:0;
-  width:100%;height:100%;
-  object-fit:cover;z-index:1;display:none
+  width:100%;height:100%;object-fit:cover;
+  display:none;
 }
 
-/* Teal perimeter border */
+/* Teal perimeter on camera area */
 .live-frame{
-  position:absolute;inset:0;
-  border:5px solid rgba(0,200,150,.5);
-  z-index:10;pointer-events:none;border-radius:1px
+  position:fixed;top:92px;left:0;right:0;bottom:0;
+  border:5px solid rgba(0,200,150,.45);
+  z-index:10;pointer-events:none;
 }
 
-/* ── TOP BAR ROW 1: brand + controls (56px) ── */
+/* ── TOP BAR ROW 1 — brand + controls (56px) ── */
 .live-top1{
-  position:absolute;top:0;left:0;right:0;
-  height:var(--top1-h);
-  background:rgba(31,56,100,.95);
-  z-index:200;
-  display:flex;align-items:center;
-  padding:0 12px;gap:8px;
-  box-shadow:0 2px 8px rgba(0,0,0,.4);
+  position:fixed;top:0;left:0;right:0;
+  width:100%;height:56px;
+  background:#1F3864;
+  z-index:9999;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 12px;
 }
 .live-brand{
-  color:#fff;font-size:18px;font-weight:900;
-  letter-spacing:.04em;flex-shrink:0;
+  color:#fff;font-size:14px;font-weight:900;
+  letter-spacing:.04em;flex-shrink:0;white-space:nowrap;
 }
 .live-brand sup{font-size:.55em;vertical-align:super}
 .live-session-lbl{
   flex:1;text-align:center;
-  color:rgba(255,255,255,.75);
-  font-size:13px;font-weight:600;
+  color:rgba(255,255,255,.8);
+  font-size:12px;font-weight:600;
   white-space:nowrap;overflow:hidden;
-  text-overflow:ellipsis;padding:0 6px;
+  text-overflow:ellipsis;
+  padding:0 10px;
 }
-.live-ctrl-mode{
+.live-top1-right{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.live-mode-btn{
   background:rgba(255,255,255,.12);border:none;
-  color:#fff;font-size:18px;
-  width:42px;height:42px;border-radius:8px;
-  cursor:pointer;touch-action:manipulation;
+  color:#fff;font-size:17px;
+  min-width:32px;min-height:32px;
+  width:36px;height:36px;
+  border-radius:6px;cursor:pointer;
+  touch-action:manipulation;
   display:flex;align-items:center;justify-content:center;
-  flex-shrink:0;font-family:inherit;
+  font-family:inherit;
 }
-.live-ctrl-mode:active{background:rgba(255,255,255,.25)}
+.live-mode-btn:active{background:rgba(255,255,255,.25)}
+.live-info-btn2{
+  background:rgba(255,255,255,.12);border:none;
+  color:#fff;font-size:17px;
+  min-width:32px;min-height:32px;
+  width:36px;height:36px;
+  border-radius:6px;cursor:pointer;
+  touch-action:manipulation;
+  display:flex;align-items:center;justify-content:center;
+  font-family:inherit;
+}
+.live-info-btn2:active{background:rgba(255,255,255,.25)}
 .live-stop-btn{
-  background:var(--red);border:none;
-  color:#fff;font-size:14px;font-weight:800;
-  padding:0 14px;height:42px;border-radius:8px;
+  background:#CC0000;border:none;color:#fff;
+  font-size:14px;font-weight:800;
+  padding:8px 16px;
+  border-radius:6px;
+  min-width:64px;min-height:36px;
   cursor:pointer;touch-action:manipulation;
-  letter-spacing:.03em;flex-shrink:0;font-family:inherit;
-  white-space:nowrap;
+  white-space:nowrap;font-family:inherit;
+  letter-spacing:.02em;
 }
 .live-stop-btn:active{opacity:.8}
-.live-info-btn{
-  background:rgba(255,255,255,.12);border:none;
-  color:rgba(255,255,255,.8);font-size:18px;
-  width:42px;height:42px;border-radius:8px;
-  cursor:pointer;touch-action:manipulation;
-  display:flex;align-items:center;justify-content:center;
-  flex-shrink:0;font-family:inherit;
-}
-.live-info-btn:active{background:rgba(255,255,255,.25)}
 
-/* ── TOP BAR ROW 2: status (38px) ── */
+/* ── TOP BAR ROW 2 — status (36px) ── */
 .live-top2{
-  position:absolute;top:var(--top1-h);left:0;right:0;
-  height:var(--top2-h);
-  background:rgba(0,0,0,.55);
-  z-index:200;
+  position:fixed;top:56px;left:0;right:0;
+  width:100%;height:36px;
+  background:rgba(31,56,100,.85);
+  z-index:9998;
   display:flex;align-items:center;justify-content:space-between;
-  padding:0 14px;
+  padding:0 12px;
 }
 .rec-indicator{
   font-size:13px;font-weight:700;color:#fff;
@@ -176,86 +171,93 @@ p{font-size:15px;line-height:1.6;color:var(--g700)}
   color:var(--coh-lo);
   animation:recPulse 1.5s ease-in-out infinite;
 }
-@keyframes recPulse{0%,100%{opacity:1}50%{opacity:.25}}
+@keyframes recPulse{0%,100%{opacity:1}50%{opacity:.2}}
 .live-elapsed{
   font-size:13px;font-weight:600;
-  color:rgba(255,255,255,.6);
+  color:rgba(255,255,255,.65);
   font-variant-numeric:tabular-nums;
 }
 
-/* ── FULL-WIDTH HR TRACE CANVAS ── */
+/* ── FULL-WIDTH HR TRACE CANVAS (top of main area) ── */
+#trace-wrap{
+  position:fixed;
+  top:92px;left:0;right:0;
+  width:100%;
+  height:25vh;
+  background:rgba(0,0,0,.35);
+  z-index:100;
+  overflow:hidden;
+}
 #hr-trace-canvas{
-  position:absolute;
-  left:0;right:0;
-  top:var(--topbar-total);
-  height:28vh;
-  z-index:20;
-  background:rgba(0,0,0,.3);
   display:block;
-  touch-action:none; /* allow JS touch handling */
+  width:100%;
+  height:100%;
 }
 
-/* ── SEB BAR (left edge vertical strip) ── */
-#seb-edge{
-  position:absolute;
+/* ── SEB INDICATOR (left edge, conditional) ── */
+#seb-indicator{
+  position:fixed;
   left:0;
-  top:calc(var(--topbar-total) + 28vh + 4px);
-  bottom:var(--readout-h);
-  width:9px;
-  background:transparent;
-  border-radius:0 4px 4px 0;
-  z-index:25;
-  transition:background .4s;
-}
-#seb-edge.active{
+  top:50%;
+  transform:translateY(-50%);
+  width:28px;height:120px;
   background:var(--coh-hi);
-  animation:sebPulse 2s ease-in-out infinite;
+  border-radius:0 8px 8px 0;
+  z-index:500;
+  display:none;
+  align-items:center;justify-content:center;
 }
-@keyframes sebPulse{0%,100%{opacity:1}50%{opacity:.45}}
-#seb-label{
-  position:absolute;
-  left:12px;
-  top:calc(var(--topbar-total) + 28vh + 4px);
-  color:var(--coh-hi);
-  font-size:11px;font-weight:800;letter-spacing:.1em;
-  z-index:26;display:none;
-  text-shadow:0 0 8px rgba(0,0,0,.8);
+#seb-indicator.active{
+  display:flex;
+  animation:sebPulse 1.2s ease-in-out infinite;
 }
-#seb-label.active{display:block}
+@keyframes sebPulse{0%,100%{opacity:1}50%{opacity:.5}}
+.seb-text{
+  color:#fff;font-size:11px;font-weight:800;letter-spacing:.1em;
+  writing-mode:vertical-rl;
+  transform:rotate(180deg);
+}
 
 /* ── HR + EPOC READOUTS (fixed bottom-right) ── */
 .live-readouts{
-  position:absolute;
-  bottom:0;right:0;
-  height:var(--readout-h);
-  padding:10px 18px 10px 22px;
-  background:rgba(31,56,100,.85);
-  z-index:200;
-  display:flex;align-items:center;
-  gap:22px;
-  border-radius:12px 0 0 0;
+  position:fixed;bottom:0;right:0;
+  z-index:9999;
+  background:rgba(15,30,60,.90);
+  padding:10px 16px 10px 20px;
+  border-top-left-radius:12px;
+  display:flex;gap:20px;align-items:flex-end;
 }
 .readout-block{text-align:center}
 .readout-lbl{display:block;font-size:10px;font-weight:700;color:rgba(255,255,255,.5);letter-spacing:.07em;text-transform:uppercase;margin-bottom:2px}
-.readout-val{font-size:52px;font-weight:900;color:#fff;font-variant-numeric:tabular-nums;line-height:1;display:block;transition:color .4s}
+.readout-val{font-size:56px;font-weight:900;color:#fff;font-variant-numeric:tabular-nums;line-height:1;display:block;transition:color .3s}
 .readout-unit{display:block;font-size:11px;color:rgba(255,255,255,.45);margin-top:2px}
+
+/* ── DOWNLOAD SCREEN ── */
+#screen-download .dl-summary-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--g200);font-size:15px}
+#screen-download .dl-summary-row:last-child{border-bottom:none}
+#screen-download .dl-summary-lbl{color:var(--g400);font-weight:600}
+#screen-download .dl-summary-val{color:var(--navy);font-weight:700}
+.dl-confirm{font-size:13px;color:var(--green2);font-weight:600;margin-top:6px;min-height:18px;display:block}
+.dl-instructions{font-size:13px;color:var(--g400);font-style:italic;text-align:center;line-height:1.6;margin-top:10px}
+.dl-callout{background:#E8FAF4;border-left:4px solid var(--coh-hi);border-radius:0 10px 10px 0;padding:14px 16px;margin-top:14px}
+.dl-callout p{font-size:14px;color:var(--g900);line-height:1.6}
 
 /* ── INFO PANEL ── */
 #info-panel{position:fixed;inset:0;z-index:9990;background:#fff;flex-direction:column;overflow:hidden;display:none}
 #info-panel.open{display:flex}
 .info-tab-bar{display:flex;background:var(--navy);flex-shrink:0;overflow-x:auto;-webkit-overflow-scrolling:touch}
-.info-tab{flex:1;min-width:80px;padding:10px 6px;font-size:11px;font-weight:700;color:rgba(255,255,255,.55);border:none;background:none;cursor:pointer;letter-spacing:.04em;text-transform:uppercase;text-align:center;border-bottom:3px solid transparent;transition:all .2s;font-family:inherit;white-space:nowrap}
+.info-tab{flex:1;min-width:76px;padding:10px 4px;font-size:11px;font-weight:700;color:rgba(255,255,255,.55);border:none;background:none;cursor:pointer;letter-spacing:.04em;text-transform:uppercase;text-align:center;border-bottom:3px solid transparent;transition:all .2s;font-family:inherit;white-space:nowrap}
 .info-tab.active{color:#fff;border-bottom-color:#fff}
 .info-pane{display:none;padding:20px;max-width:700px;margin:0 auto;width:100%}
 .info-pane.active{display:block}
 .info-card{background:#fff;border:2px solid var(--g200);border-radius:12px;padding:18px;margin-bottom:14px}
 .info-card-icon{font-size:26px;margin-bottom:6px}
-.info-card h3{font-size:14px;font-weight:800;color:var(--navy);margin-bottom:8px;text-transform:none;letter-spacing:0}
+.info-card h3{font-size:14px;font-weight:800;color:var(--navy);margin-bottom:8px}
 .info-card .what-lbl{font-size:10px;font-weight:700;color:var(--g400);text-transform:uppercase;letter-spacing:.07em;margin-top:10px;margin-bottom:3px}
 .info-card p{font-size:14px;color:var(--g700);line-height:1.55}
 .colour-band{border-radius:8px;padding:14px 16px;margin-bottom:10px}
 .colour-band h4{font-size:14px;font-weight:800;color:#fff;margin-bottom:4px}
-.colour-band p{font-size:13px;color:rgba(255,255,255,.88);line-height:1.5}
+.colour-band p{font-size:13px;color:rgba(255,255,255,.9);line-height:1.5}
 .colour-note{font-size:13px;color:var(--g700);font-style:italic;margin-top:14px;padding:12px;background:var(--g100);border-radius:8px;line-height:1.5}
 .seb-step{display:flex;gap:14px;margin-bottom:14px;align-items:flex-start}
 .seb-step-letter{width:40px;height:40px;border-radius:50%;background:var(--navy);color:#fff;font-size:18px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -264,24 +266,22 @@ p{font-size:15px;line-height:1.6;color:var(--g700)}
 .green-callout{background:#E8FAF4;border-left:4px solid var(--coh-hi);border-radius:0 8px 8px 0;padding:14px 16px;margin-top:14px}
 .green-callout p{font-size:14px;color:var(--g900);line-height:1.6}
 .epoc-table{width:100%;border-collapse:collapse;margin:12px 0}
-.epoc-table th{font-size:11px;font-weight:700;color:var(--g400);text-transform:uppercase;letter-spacing:.06em;padding:6px 10px;text-align:left;border-bottom:2px solid var(--g200)}
-.epoc-table td{font-size:14px;padding:8px 10px;border-bottom:1px solid var(--g200);color:var(--g700)}
+.epoc-table th{font-size:11px;font-weight:700;color:var(--g400);text-transform:uppercase;letter-spacing:.06em;padding:6px 8px;text-align:left;border-bottom:2px solid var(--g200)}
+.epoc-table td{font-size:14px;padding:7px 8px;border-bottom:1px solid var(--g200);color:var(--g700)}
 .epoc-table tr:last-child td{border-bottom:none}
 .info-section-lbl{font-size:11px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.07em;margin:18px 0 8px}
 .info-note{font-size:13px;color:var(--g700);background:var(--g100);border-radius:8px;padding:12px 14px;line-height:1.6;margin-top:10px}
 
-/* ── BLE ERROR OVERLAY ── */
+/* ── BLE ERROR ── */
 #ble-error{position:fixed;inset:0;z-index:9980;background:#fff;flex-direction:column;overflow-y:auto;display:none}
 #ble-error.open{display:flex}
 .ble-err-body{flex:1;padding:24px;max-width:540px;margin:0 auto;width:100%}
 .ble-err-icon{font-size:48px;margin-bottom:12px;text-align:center}
 .ble-err-title{font-size:22px;font-weight:800;color:var(--navy);margin-bottom:8px}
 .ble-err-desc{font-size:15px;color:var(--g700);line-height:1.6;margin-bottom:20px}
-.ble-url-box{background:var(--g100);border-radius:8px;padding:14px;font-size:14px;color:var(--navy);font-weight:600;word-break:break-all;margin-bottom:16px;cursor:pointer;border:2px solid var(--g200)}
+.ble-url-box{background:var(--g100);border-radius:8px;padding:14px;font-size:13px;color:var(--navy);font-weight:600;word-break:break-all;margin-bottom:16px;cursor:pointer;border:2px solid var(--g200)}
 .ble-step{display:flex;gap:12px;align-items:flex-start;margin-bottom:12px}
 .ble-step-num{width:28px;height:28px;border-radius:50%;background:var(--navy);color:#fff;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-
-@media(min-width:768px){.content{padding:28px;padding-bottom:calc(28px + env(safe-area-inset-bottom))}}
 </style>
 </head>
 <body>
@@ -301,14 +301,16 @@ p{font-size:15px;line-height:1.6;color:var(--g700)}
   </div>
 </div>
 
-<!-- ══ SCREEN 1: SETUP ══ -->
+<!-- ══════════════════════════════════════
+     SCREEN 1: SETUP
+     ══════════════════════════════════════ -->
 <div id="screen-setup" class="screen active">
   <div class="hdr">
-    <span class="hdr-wordmark">COGCON<sup>®</sup></span>
-    <div class="hdr-right">
+    <div class="hdr-left">
+      <span class="hdr-wordmark">COGCON<sup>®</sup></span>
       <span class="hdr-title">Live Coaching Tool</span>
-      <button class="hdr-btn" onclick="_openInfo()" title="Reference">&#9432;</button>
     </div>
+    <button class="hdr-info-btn" onclick="_openInfo()">&#9432;</button>
   </div>
   <div class="content centered">
 
@@ -352,7 +354,7 @@ p{font-size:15px;line-height:1.6;color:var(--g700)}
     <button class="btn btn-outline" id="btn-strap" onclick="BLE.connect()"
             style="max-width:600px">Connect Strap</button>
     <p class="sub" id="strap-rr-note" style="display:none;text-align:center;max-width:600px;color:var(--coh-amb)">
-      ⚠ HR data only — no RR intervals detected. Coherence trace unavailable.
+      ⚠ HR data only — no RR intervals. Coherence unavailable.
     </p>
     <button class="btn btn-navy" onclick="LV.startSession()"
             style="max-width:600px">&#9654; Start Session</button>
@@ -360,40 +362,49 @@ p{font-size:15px;line-height:1.6;color:var(--g700)}
   </div>
 </div>
 
-<!-- ══ SCREEN 2: LIVE ══ -->
+<!-- ══════════════════════════════════════
+     SCREEN 2: LIVE
+     All interactive elements position:fixed
+     (hidden automatically when screen is display:none)
+     ══════════════════════════════════════ -->
 <div id="screen-live" class="screen">
 
-  <!-- Camera feed -->
-  <video id="cam-visible" autoplay muted playsinline></video>
-  <!-- Teal border frame -->
+  <!-- Camera area (below top bars) -->
+  <div id="cam-area">
+    <video id="cam-visible" autoplay muted playsinline></video>
+  </div>
+
+  <!-- Teal border -->
   <div class="live-frame"></div>
 
-  <!-- ROW 1: Brand + controls (always visible, all screen sizes) -->
+  <!-- ROW 1: Brand + controls — ALWAYS VISIBLE -->
   <div class="live-top1">
     <span class="live-brand">COGCON<sup>®</sup></span>
     <span class="live-session-lbl" id="live-session-lbl"></span>
-    <button class="live-ctrl-mode" id="btn-mode" onclick="LV.toggleTraceMode()" title="Toggle trace colours">&#9788;</button>
-    <button class="live-stop-btn" onclick="LV.stopSession()">&#9632; Stop</button>
-    <button class="live-info-btn" onclick="_openInfo()">&#9432;</button>
+    <div class="live-top1-right">
+      <button class="live-mode-btn" id="btn-mode" onclick="LV.toggleTraceMode()">&#9788;</button>
+      <button class="live-info-btn2" onclick="_openInfo()">&#9432;</button>
+      <button class="live-stop-btn" onclick="LV.stopSession()">&#9632; Stop</button>
+    </div>
   </div>
 
-  <!-- ROW 2: REC status + elapsed time -->
+  <!-- ROW 2: REC status + elapsed -->
   <div class="live-top2">
     <span class="rec-indicator" id="rec-indicator">&#9711; LIVE</span>
     <span class="live-elapsed" id="live-elapsed">0:00</span>
   </div>
 
   <!-- Full-width HR trace canvas -->
-  <canvas id="hr-trace-canvas"
-          ontouchstart="_traceTouch(event,'start')"
-          ontouchmove="_traceTouch(event,'move')"
-          ontouchend="_traceTouch(event,'end')"></canvas>
+  <div id="trace-wrap">
+    <canvas id="hr-trace-canvas"></canvas>
+  </div>
 
-  <!-- SEB left-edge bar + label -->
-  <div id="seb-edge"></div>
-  <span id="seb-label">SEB</span>
+  <!-- SEB left-edge indicator -->
+  <div id="seb-indicator">
+    <span class="seb-text">SEB</span>
+  </div>
 
-  <!-- HR + EPOC readouts — fixed bottom right -->
+  <!-- HR + EPOC readouts — bottom right -->
   <div class="live-readouts">
     <div class="readout-block">
       <span class="readout-lbl">HR</span>
@@ -401,7 +412,7 @@ p{font-size:15px;line-height:1.6;color:var(--g700)}
       <span class="readout-unit">BPM</span>
     </div>
     <div class="readout-block">
-      <span class="readout-lbl">EPOC (est.)</span>
+      <span class="readout-lbl">EPOC est.</span>
       <span class="readout-val" id="lv-epoc">0.0</span>
       <span class="readout-unit">ml/kg</span>
     </div>
@@ -409,71 +420,58 @@ p{font-size:15px;line-height:1.6;color:var(--g700)}
 
 </div>
 
-<!-- ══ SCREEN 3: SUMMARY ══ -->
-<div id="screen-summary" class="screen">
+<!-- ══════════════════════════════════════
+     SCREEN 3: DOWNLOAD / SESSION COMPLETE
+     ══════════════════════════════════════ -->
+<div id="screen-download" class="screen">
   <div class="hdr">
-    <span class="hdr-wordmark">COGCON<sup>®</sup></span>
-    <div class="hdr-right">
-      <span class="hdr-title">Session Summary</span>
-      <button class="hdr-btn" onclick="_openInfo()" title="Reference">&#9432;</button>
+    <div class="hdr-left">
+      <span class="hdr-wordmark">COGCON<sup>®</sup></span>
+      <span class="hdr-title">Session Complete</span>
     </div>
+    <button class="hdr-info-btn" onclick="_openInfo()">&#9432;</button>
   </div>
   <div class="content centered">
 
+    <!-- Summary card -->
     <div class="card">
-      <h2>Session Complete</h2>
-      <p class="sub" id="sum-meta" style="margin-bottom:16px"></p>
-      <div class="metric-grid">
-        <div class="metric-cell">
-          <div class="metric-cell-lbl">Duration</div>
-          <div class="metric-cell-val" id="sum-dur">—</div>
-        </div>
-        <div class="metric-cell">
-          <div class="metric-cell-lbl">Avg HR</div>
-          <div class="metric-cell-val" id="sum-hr">—</div>
-        </div>
-        <div class="metric-cell">
-          <div class="metric-cell-lbl">Peak EPOC</div>
-          <div class="metric-cell-val" id="sum-epoc">—</div>
-        </div>
-        <div class="metric-cell">
-          <div class="metric-cell-lbl">Avg Coherence</div>
-          <div class="metric-cell-val" id="sum-coh">—</div>
-        </div>
-      </div>
-      <p style="font-size:11px;font-weight:700;color:var(--g400);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">
-        Time in Coherence Band
+      <h2>Session Summary</h2>
+      <div id="dl-summary-rows"><!-- populated by JS --></div>
+    </div>
+
+    <!-- Download buttons -->
+    <div class="card">
+      <h2>Download Data</h2>
+
+      <button class="btn btn-navy btn-lg" id="btn-dl-video"
+              style="display:none" onclick="_doDownloadVideo()">
+        &#11015; Download Video (.webm)
+      </button>
+      <span class="dl-confirm" id="dl-video-confirm"></span>
+
+      <button class="btn btn-navy btn-lg" style="margin-top:12px"
+              onclick="_doDownloadCSV()">
+        &#11015; Download CSV Data
+      </button>
+      <span class="dl-confirm" id="dl-csv-confirm"></span>
+
+      <p class="dl-instructions">
+        Files save to your Downloads folder.<br>
+        On Android: Files app → Downloads<br>
+        On Mac/PC: Downloads folder
       </p>
-      <div class="band-row">
-        <div class="band-cell" style="background:var(--coh-hi)">
-          <div class="band-val" id="sum-hi">—</div>
-          <div class="band-lbl">&gt;70%</div>
-        </div>
-        <div class="band-cell" style="background:var(--coh-mid)">
-          <div class="band-val" id="sum-mid">—</div>
-          <div class="band-lbl">40–70%</div>
-        </div>
-        <div class="band-cell" style="background:var(--coh-amb)">
-          <div class="band-val" id="sum-amb">—</div>
-          <div class="band-lbl">20–40%</div>
-        </div>
-        <div class="band-cell" style="background:var(--coh-lo)">
-          <div class="band-val" id="sum-lo">—</div>
-          <div class="band-lbl">&lt;20%</div>
-        </div>
+
+      <div class="dl-callout">
+        <p><strong>Next step:</strong> Upload the CSV to
+          <strong>cogcon-graphs.streamlit.app</strong>
+          to generate your four-panel graph and AI coaching report.</p>
       </div>
     </div>
 
     <div style="width:100%;max-width:600px">
-      <button class="btn btn-navy" id="btn-dl-video" style="display:none"
-              onclick="downloadVideo(_recChunks)">&#11015; Download Video (.webm)</button>
-      <button class="btn btn-navy" onclick="downloadCSV()">&#11015; Download CSV Data</button>
-      <p style="font-size:12px;color:var(--g400);text-align:center;margin-top:10px;line-height:1.6">
-        Files also download automatically when session ends.<br>
-        On iPad, files save to Files app → Downloads folder.<br>
-        On Mac/PC, files save to your Downloads folder.
-      </p>
-      <button class="btn btn-outline" onclick="LV.newSession()" style="margin-top:14px">&#8592; New Session</button>
+      <button class="btn btn-navy btn-lg" onclick="LV.newSession()">
+        &#8592; Start New Session
+      </button>
     </div>
 
   </div>
@@ -483,7 +481,7 @@ p{font-size:15px;line-height:1.6;color:var(--g700)}
 <div id="info-panel">
   <div class="hdr" style="flex-shrink:0">
     <span class="hdr-wordmark">&#9432; COGCON<sup>®</sup> Reference</span>
-    <button class="hdr-btn" onclick="_closeInfo()" style="font-size:22px;font-weight:400">&#10005;</button>
+    <button class="hdr-info-btn" onclick="_closeInfo()" style="font-size:20px;font-weight:400">&#10005;</button>
   </div>
   <div class="info-tab-bar">
     <button class="info-tab active" onclick="_infoTab(0)">What We Measure</button>
@@ -493,7 +491,7 @@ p{font-size:15px;line-height:1.6;color:var(--g700)}
   </div>
   <div style="flex:1;overflow-y:auto">
 
-    <!-- TAB 0 -->
+    <!-- TAB 0: What We Measure -->
     <div class="info-pane active" id="info-pane-0">
       <h2 style="margin-bottom:16px">What We're Measuring</h2>
       <div class="info-card">
@@ -512,57 +510,53 @@ p{font-size:15px;line-height:1.6;color:var(--g700)}
         <div class="what-lbl">What it is</div>
         <p>A measure of heart rate variability derived from the rolling 60-beat RMSSD of RR intervals, normalised to a 0–100% scale.</p>
         <div class="what-lbl">Why it matters</div>
-        <p>Coherence reflects autonomic nervous system regulation. High coherence means the candidate is physiologically regulated. Low coherence means stress is dominating and cognitive performance is at risk.</p>
+        <p>Coherence reflects autonomic nervous system regulation. High coherence = regulated. Low coherence = stress dominating, cognitive performance at risk.</p>
         <div class="what-lbl">What to look for</div>
-        <p>Green trace = regulated. Red trace = dysregulated. Watch for colour shifts at scenario entry and during high-demand moments.</p>
+        <p>Green trace (≥60%) = regulated. Amber (20–59%) = at risk. Red (&lt;20%) = dysregulated. Watch for colour shifts at scenario entry.</p>
       </div>
       <div class="info-card">
         <div class="info-card-icon">&#8593;</div>
         <h3>EPOC (Estimated)</h3>
         <div class="what-lbl">What it is</div>
-        <p>Excess Post-exercise Oxygen Consumption — a measure of accumulated physiological cost. Displayed as an estimate derived from heart rate data.</p>
+        <p>Excess Post-exercise Oxygen Consumption — accumulated physiological cost estimated from heart rate data.</p>
         <div class="what-lbl">Why it matters</div>
-        <p>EPOC reflects the total physiological load on the candidate. Rising EPOC under moderate physical activity indicates stress activation is compounding the physical demand.</p>
+        <p>Rising EPOC under moderate physical activity indicates stress activation is compounding the physical demand.</p>
         <div class="what-lbl">What to look for</div>
         <p>Rapid EPOC rise at scenario entry = high stress activation. Sustained elevation = accumulated load affecting cognitive capacity.</p>
         <div class="what-lbl">Note</div>
-        <p>Precise EPOC is available post-session from Firstbeat XLSX export.</p>
+        <p>Precise EPOC available post-session from Firstbeat XLSX export.</p>
       </div>
       <div class="info-card">
         <div class="info-card-icon">&#9889;</div>
         <h3>SEB Windows</h3>
         <div class="what-lbl">What it is</div>
-        <p>Periods where coherence drops below 40% for 5 or more seconds — automatically detected and flagged.</p>
+        <p>Periods where coherence drops below 30% — automatically detected and flagged in real time. Activates immediately and clears as soon as coherence returns to 30% or above.</p>
         <div class="what-lbl">Why it matters</div>
-        <p>SEB windows are the moments where the candidate most needed to regulate. They are retrospective coaching anchors — where SEB would have had highest impact.</p>
+        <p>SEB windows are retrospective coaching anchors — where SEB would have had highest impact.</p>
         <div class="what-lbl">What to look for</div>
-        <p>Green bar on screen left edge = SEB window active. Count and timing of windows drives the retrospective debrief.</p>
+        <p>Green bar on left edge = SEB window active. Count and timing drives the retrospective debrief.</p>
       </div>
     </div>
 
-    <!-- TAB 1 -->
+    <!-- TAB 1: Colour Coding -->
     <div class="info-pane" id="info-pane-1">
       <h2 style="margin-bottom:16px">HR Trace Colour Thresholds</h2>
       <div class="colour-band" style="background:var(--coh-hi)">
-        <h4>GREEN / YELLOW — Regulated</h4>
-        <p>Coherence &gt; 70%<br>Autonomic regulation stable. Cognitive capacity protected. Optimal performance state.</p>
-      </div>
-      <div class="colour-band" style="background:var(--coh-mid)">
-        <h4>ORANGE — Moderate</h4>
-        <p>Coherence 40–70%<br>Regulation present but under load. Monitor for further drop. SEB proactively here prevents dysregulation.</p>
+        <h4>GREEN — Regulated (60–100%)</h4>
+        <p>Coherence ≥ 60% — Autonomic regulation stable. Cognitive capacity protected. Optimal performance state.</p>
       </div>
       <div class="colour-band" style="background:var(--coh-amb)">
-        <h4>AMBER — Low / SEB Window</h4>
-        <p>Coherence 20–40%<br>Stress dominating. Cognitive performance at risk. SEB window active — highest leverage intervention point.</p>
+        <h4>AMBER — At Risk (20–59%)</h4>
+        <p>Coherence 20–59% — Regulation under increasing load. SEB here prevents further dysregulation. SEB window active below 30%.</p>
       </div>
       <div class="colour-band" style="background:var(--coh-lo)">
-        <h4>RED — Dysregulated</h4>
-        <p>Coherence &lt; 20%<br>Significant dysregulation. Working memory and decision quality impaired. Immediate SEB required.</p>
+        <h4>RED — Dysregulated (0–19%)</h4>
+        <p>Coherence &lt; 20% — Working memory and decision quality impaired. Immediate SEB required.</p>
       </div>
-      <div class="colour-note">Note: Colour is coherence, height is HR. A red trace at moderate HR is more concerning than an orange trace at high HR.</div>
+      <div class="colour-note">Note: Colour is coherence, height is HR. A red trace at moderate HR is more concerning than an amber trace at high HR.</div>
     </div>
 
-    <!-- TAB 2 -->
+    <!-- TAB 2: SEB Protocol -->
     <div class="info-pane" id="info-pane-2">
       <h2 style="margin-bottom:16px">SEB Cycle — Operational Reset Tool</h2>
       <div class="seb-step">
@@ -575,7 +569,7 @@ p{font-size:15px;line-height:1.6;color:var(--g700)}
       </div>
       <div class="seb-step">
         <div class="seb-step-letter">B</div>
-        <div class="seb-step-body"><h4>Breathing &amp; Body Language</h4><p>Tactical breath to downshift arousal. Body language as performance control — squared, upright, deliberate. Not cosmetic.</p></div>
+        <div class="seb-step-body"><h4>Breathing &amp; Body Language</h4><p>Tactical breath to downshift arousal. Body language as performance control — squared, upright, deliberate.</p></div>
       </div>
       <div class="seb-step">
         <div class="seb-step-letter" style="font-size:11px">OPS</div>
@@ -583,20 +577,18 @@ p{font-size:15px;line-height:1.6;color:var(--g700)}
       </div>
       <div class="seb-step">
         <div class="seb-step-letter" style="font-size:12px">WIN</div>
-        <div class="seb-step-body"><h4>What's Important Now</h4><p>Priority anchor. Compresses attention onto the next correct action. The bridge between regulation and decision execution.</p></div>
+        <div class="seb-step-body"><h4>What's Important Now</h4><p>Priority anchor. Compresses attention onto the next correct action. Bridge between regulation and decision execution.</p></div>
       </div>
       <div class="info-section-lbl">Pre-Scenario Default Protocol</div>
-      <div class="green-callout">
-        <p>
-          1. Execute SEB the moment job comms come through — by default, not when stress is noticed.<br><br>
-          2. Apply multiple cycles in the truck if stress or worry builds during the wait.<br><br>
-          3. Final SEB in the last 90 seconds before exiting the truck.<br><br>
-          4. Identify WIN before the door opens.
-        </p>
-      </div>
+      <div class="green-callout"><p>
+        1. Execute SEB the moment job comms come through — by default, not when stress is noticed.<br><br>
+        2. Apply multiple cycles in the truck if stress or worry builds during the wait.<br><br>
+        3. Final SEB in the last 90 seconds before exiting the truck.<br><br>
+        4. Identify WIN before the door opens.
+      </p></div>
     </div>
 
-    <!-- TAB 3 -->
+    <!-- TAB 3: EPOC & Energy -->
     <div class="info-pane" id="info-pane-3">
       <h2 style="margin-bottom:16px">EPOC &amp; Energy Rate Reference</h2>
       <div class="info-section-lbl">EPOC Bands — Full PPE Operational Context</div>
@@ -608,7 +600,7 @@ p{font-size:15px;line-height:1.6;color:var(--g700)}
         <tr><td>High</td><td>60–120 ml/kg</td><td>Heavy sustained load</td></tr>
         <tr><td>Very High</td><td>120+ ml/kg</td><td>Extreme accumulated cost</td></tr>
       </table>
-      <div class="info-note"><strong>PPE Note:</strong> Full structural PPE increases metabolic cost 30–50% above normal clothing. Thermal load drives cardiovascular drift independently of movement intensity. If BA mask is not fitted, breathing is unrestricted — thermal load and gear weight are the primary confounds.</div>
+      <div class="info-note"><strong>PPE Note:</strong> Full structural PPE increases metabolic cost 30–50% above normal clothing. Thermal load drives cardiovascular drift independently of movement intensity.</div>
       <div class="info-section-lbl">Energy Rate Reference</div>
       <div class="info-note">Walking baseline: ~210 kcal/h<br>PPE thermal minimum: ~330 kcal/h</div>
       <div class="info-section-lbl">Three Compounding Sources</div>
@@ -624,7 +616,7 @@ p{font-size:15px;line-height:1.6;color:var(--g700)}
 <div id="ble-error">
   <div class="hdr" style="flex-shrink:0">
     <span class="hdr-wordmark">COGCON<sup>®</sup></span>
-    <button class="hdr-btn" onclick="_closeBLEError()" style="font-size:22px">&#10005;</button>
+    <button class="hdr-info-btn" onclick="_closeBLEError()" style="font-size:20px">&#10005;</button>
   </div>
   <div class="ble-err-body" id="ble-err-body"></div>
 </div>
@@ -650,23 +642,30 @@ const ST = {
 
 // ── BEAT-TO-BEAT BUFFERS ──────────────────────────────────────────────────────
 let _beatTimes = [];   // ms since sessionStart
-let _beatHR    = [];   // instantaneous HR (60000/rr_ms)
+let _beatHR    = [];   // instantaneous HR = 60000 / rr_ms
 let _beatCoh   = [];   // coherence at that beat
-const WINDOW_MS = 40000;  // 40s visible window
-const KEEP_MS   = 300000; // keep 5 min of history
+const WINDOW_MS = 40000;   // 40s visible x-window
+const KEEP_MS   = 300000;  // keep 5 min of history
 
-// ── Y-AXIS STATE ──────────────────────────────────────────────────────────────
-let _yCenter = 120;
-let _yRange  = 80;
-
-// ── X-AXIS STATE ──────────────────────────────────────────────────────────────
-let _xOffset = 0;  // seconds scrolled back from "now" (0 = live)
+// ── TRACE Y-AXIS (fixed 70–180 BPM per spec) ─────────────────────────────────
+const Y_MIN = 70, Y_MAX = 180;
 
 // ── SEB DETECTION STATE ───────────────────────────────────────────────────────
-let _sebLowStart    = null;   // timestamp when coherence first dropped < 40
-let _sebWindowActive = false;
+let _sebWindowActive = false;  // triggers immediately when coh < 30%
 
-// ── BLE — Bluetooth HR strap ──────────────────────────────────────────────────
+// ── EPOC ──────────────────────────────────────────────────────────────────────
+let _epoc = 0, _epocRest = 60;
+function _updateEpoc(hr) { _epoc += Math.max(0, hr - _epocRest) * (1/60) * 0.1; }
+
+// ── COHERENCE COLOUR ──────────────────────────────────────────────────────────
+// Green ≥60% | Amber 20–59% | Red <20%
+function _cohColour(coh) {
+  if (coh >= 60) return ST.darkTrace ? '#00C896' : '#FFD700';
+  if (coh >= 20) return '#FF8C00';
+  return '#FF4444';
+}
+
+// ── BLE ───────────────────────────────────────────────────────────────────────
 const BLE = {
   hr:null, rrBuffer:[], coherence:0, hasRR:false,
   device:null, char:null, connected:false, _rrCheckTimer:null,
@@ -688,7 +687,6 @@ const BLE = {
       this.char.addEventListener('characteristicvaluechanged', e => BLE.onData(e));
       this.connected = true;
       this.device.addEventListener('gattserverdisconnected', () => BLE.onDisconnect());
-
       const btn = _g('btn-strap');
       if (btn) {
         btn.textContent = '✓ ' + (this.device.name || 'Strap') + ' — RR: checking…';
@@ -699,7 +697,7 @@ const BLE = {
       this._rrCheckTimer = setTimeout(() => {
         if (!this.hasRR) {
           const b = _g('btn-strap');
-          if (b) b.textContent = '✓ ' + (this.device.name || 'Strap') + ' — RR: No';
+          if (b) b.textContent = '✓ ' + (this.device.name||'Strap') + ' — RR: No';
           const n = _g('strap-rr-note'); if (n) n.style.display = '';
         }
       }, 5000);
@@ -714,7 +712,7 @@ const BLE = {
     const hr16  = flags & 0x01;
     this.hr     = hr16 ? v.getUint16(1, true) : v.getUint8(1);
 
-    // Update HR readout immediately on every beat
+    // Update HR DOM immediately on every beat
     const hrEl = _g('lv-hr');
     if (hrEl) {
       hrEl.textContent = this.hr;
@@ -731,7 +729,7 @@ const BLE = {
       }
       let off = hr16 ? 3 : 2;
       while (off + 1 < v.byteLength) {
-        const rr = v.getUint16(off, true) / 1024 * 1000;
+        const rr = v.getUint16(off, true) / 1024 * 1000; // 1/1024 s → ms
         if (rr > 200 && rr < 3000) {
           this.rrBuffer.push(rr);
           if (this.rrBuffer.length > 128) this.rrBuffer.shift();
@@ -782,7 +780,7 @@ function _calcCoherence(rrBuf) {
   const sig=signal.map(x=>x-mean);
   let totalPow=0, lfPeak=0;
   for (let k=1;k<=30;k++) {
-    const f=k*0.02; let re=0, im=0;
+    const f=k*0.02; let re=0,im=0;
     for (let i=0;i<sig.length;i++) { const a=2*Math.PI*f*i/sr; re+=sig[i]*Math.cos(a); im-=sig[i]*Math.sin(a); }
     const p=re*re+im*im; totalPow+=p;
     if (f>=0.04&&f<=0.26&&p>lfPeak) lfPeak=p;
@@ -790,54 +788,53 @@ function _calcCoherence(rrBuf) {
   return totalPow===0?0:Math.min(100,Math.round(lfPeak/totalPow*100*3.5));
 }
 
-// ── COHERENCE COLOUR ──────────────────────────────────────────────────────────
-function _cohColour(coh) {
-  if (coh > 70)  return ST.darkTrace ? '#00C896' : '#FFD700';
-  if (coh >= 40) return '#FFA500';
-  if (coh >= 20) return '#FF8C00';
-  return '#FF4444';
-}
-
-// ── EPOC ──────────────────────────────────────────────────────────────────────
-let _epoc=0, _epocRest=60;
-function _updateEpoc(hr) { _epoc += Math.max(0, hr-_epocRest) * (1/60) * 0.1; }
-
-// ── FULL-WIDTH HR TRACE CANVAS ────────────────────────────────────────────────
-function _drawTrace() {
+// ── CANVAS RESIZE ─────────────────────────────────────────────────────────────
+function _resizeCanvas() {
   const canvas = _g('hr-trace-canvas');
   if (!canvas) return;
-  const W = canvas.offsetWidth, H = canvas.offsetHeight;
-  if (!W || !H) return;
-  canvas.width = W; canvas.height = H;
+  canvas.width  = window.innerWidth;
+  const wrap = canvas.parentElement;
+  canvas.height = wrap ? wrap.clientHeight : Math.round(window.innerHeight * 0.25);
+  _drawTrace();
+}
+
+// ── FULL-WIDTH HR TRACE DRAW ──────────────────────────────────────────────────
+function _drawTrace() {
+  const canvas = _g('hr-trace-canvas');
+  if (!canvas || !canvas.width || !canvas.height) return;
+  const W = canvas.width, H = canvas.height;
   const ctx = canvas.getContext('2d');
   ctx.clearRect(0, 0, W, H);
 
-  const LABEL_W = 34;
+  const LABEL_W = 36;  // px for y-axis labels
   const plotW   = W - LABEL_W;
   const plotX   = LABEL_W;
-  const yTop = _yCenter + _yRange / 2;
-  const yBot = _yCenter - _yRange / 2;
+  const yRange  = Y_MAX - Y_MIN;
 
-  function hrToY(hr) { return H - ((hr - yBot) / _yRange) * (H - 8) - 4; }
+  function hrToY(hr) {
+    return H - ((hr - Y_MIN) / yRange) * (H - 10) - 5;
+  }
 
-  // Y-axis grid + labels
-  const firstGrid = Math.ceil(yBot / 10) * 10;
-  for (let bpm = firstGrid; bpm <= yTop; bpm += 10) {
+  // Y-axis grid lines + labels every 20 BPM
+  for (let bpm = Y_MIN; bpm <= Y_MAX; bpm += 20) {
     const yy = hrToY(bpm);
+    // Grid line
     ctx.beginPath();
     ctx.strokeStyle = 'rgba(255,255,255,.15)';
-    ctx.lineWidth = 0.5;
+    ctx.lineWidth = 0.75;
     ctx.moveTo(plotX, yy); ctx.lineTo(W, yy); ctx.stroke();
-    ctx.fillStyle = 'rgba(255,255,255,.6)';
-    ctx.font = '11px -apple-system,Arial,sans-serif';
+    // Label
+    ctx.fillStyle = 'rgba(255,255,255,.65)';
+    ctx.font = '10px -apple-system,Arial,sans-serif';
     ctx.textAlign = 'right';
-    ctx.fillText(bpm, LABEL_W - 3, yy + 4);
+    ctx.textBaseline = 'middle';
+    ctx.fillText(bpm, LABEL_W - 4, yy);
   }
 
   if (_beatTimes.length < 2) return;
 
   const nowMs     = ST.sessionStart ? (Date.now() - ST.sessionStart) : 0;
-  const viewEnd   = nowMs - _xOffset * 1000;
+  const viewEnd   = nowMs;
   const viewStart = viewEnd - WINDOW_MS;
 
   ctx.lineWidth = 2.5;
@@ -857,214 +854,118 @@ function _drawTrace() {
   }
 }
 
-// ── AUTO Y-CENTER ─────────────────────────────────────────────────────────────
-function _autoYCenter() {
-  const last10 = _beatHR.slice(-10);
-  if (last10.length === 0) return;
-  _yCenter = Math.round(last10.reduce((a,b)=>a+b,0)/last10.length);
-  _drawTrace();
-}
-
-// ── TRACE TOUCH (vertical = y-scroll, horizontal = x-scroll) ─────────────────
-let _tTouchX0=null, _tTouchY0=null;
-function _traceTouch(e, phase) {
-  e.preventDefault();
-  if (phase === 'start') {
-    _tTouchX0 = e.touches[0].clientX;
-    _tTouchY0 = e.touches[0].clientY;
-  } else if (phase === 'move' && _tTouchY0 !== null) {
-    const dy = e.touches[0].clientY - _tTouchY0;
-    const dx = e.touches[0].clientX - _tTouchX0;
-    if (Math.abs(dy) > Math.abs(dx)) {
-      // Vertical: scroll y-axis
-      _yCenter = Math.max(60, Math.min(200, _yCenter + Math.round(dy * 0.4)));
-      _tTouchY0 = e.touches[0].clientY;
-    } else {
-      // Horizontal: scroll x-axis
-      const nowSec = ST.sessionStart ? (Date.now()-ST.sessionStart)/1000 : 0;
-      const maxBack = Math.max(0, nowSec - 40);
-      _xOffset = Math.max(0, Math.min(maxBack, _xOffset - dx * 0.05));
-      _tTouchX0 = e.touches[0].clientX;
-    }
-    _drawTrace();
-  } else if (phase === 'end') {
-    _tTouchX0=null; _tTouchY0=null;
-  }
-}
-
-// ── SEB DETECTION (5s continuous below 40%) ───────────────────────────────────
+// ── SEB DETECTION (immediate: below 30% = on, 30%+ = off) ────────────────────
 function _checkSEB(hr, coh) {
   const now = Date.now();
-  if (hr !== null && coh < 40) {
-    if (_sebLowStart === null) {
-      _sebLowStart = now;
-    } else if (!_sebWindowActive && (now - _sebLowStart) >= 5000) {
+  if (hr !== null && coh < 30) {
+    if (!_sebWindowActive) {
       _sebWindowActive = true;
-      ST.sebWindows.push({ start: _sebLowStart, end: null });
-      const edge = _g('seb-edge'); if (edge) edge.classList.add('active');
-      const lbl  = _g('seb-label'); if (lbl) lbl.classList.add('active');
+      ST.sebWindows.push({ start: now, end: null });
+      const el = _g('seb-indicator'); if (el) el.classList.add('active');
     }
   } else {
-    if (_sebLowStart !== null) {
-      if (_sebWindowActive) {
-        const last = ST.sebWindows[ST.sebWindows.length - 1];
-        if (last) last.end = now;
-        _sebWindowActive = false;
-        const edge = _g('seb-edge'); if (edge) edge.classList.remove('active');
-        const lbl  = _g('seb-label'); if (lbl) lbl.classList.remove('active');
-      }
-      _sebLowStart = null;
+    if (_sebWindowActive) {
+      const last = ST.sebWindows[ST.sebWindows.length-1];
+      if (last) last.end = now;
+      _sebWindowActive = false;
+      const el = _g('seb-indicator'); if (el) el.classList.remove('active');
     }
   }
-}
-
-// ── ELAPSED TIMER ─────────────────────────────────────────────────────────────
-function _elapsedStr() {
-  if (!ST.sessionStart) return '0:00';
-  const s = Math.round((Date.now() - ST.sessionStart) / 1000);
-  return Math.floor(s/60) + ':' + String(s%60).padStart(2,'0');
 }
 
 // ── RECORDING CANVAS OVERLAY ──────────────────────────────────────────────────
 function _drawRecordOverlay(ctx, W, H) {
-  const font   = '-apple-system,Arial,sans-serif';
-  const top1H  = Math.round(H * 0.075);  // brand bar
-  const top2H  = Math.round(H * 0.05);   // status bar
-  const traceH = Math.round(H * 0.27);   // full-width trace strip
-  const botH   = Math.round(H * 0.09);   // readouts bar
-  const pad    = Math.round(W * 0.013);
+  const font  = '-apple-system,Arial,sans-serif';
+  const top1H = Math.round(H * 0.075);
+  const top2H = Math.round(H * 0.048);
+  const totTop= top1H + top2H;
+  const traceH= Math.round(H * 0.27);
+  const botH  = Math.round(H * 0.10);
+  const pad   = Math.round(W * 0.014);
 
   // Teal border
   ctx.save();
-  ctx.strokeStyle = 'rgba(0,200,150,.5)';
-  ctx.lineWidth = 5;
+  ctx.strokeStyle='rgba(0,200,150,.45)'; ctx.lineWidth=5;
   ctx.strokeRect(2.5,2.5,W-5,H-5);
   ctx.restore();
 
-  // ── TOP BAR 1: brand + candidate + REC ──
+  // TOP BAR 1
   ctx.save();
-  ctx.fillStyle = 'rgba(31,56,100,.92)';
-  ctx.fillRect(0, 0, W, top1H);
-  const fLg = Math.max(12, Math.round(W * 0.018));
-  const fSm = Math.max(10, Math.round(W * 0.013));
-  ctx.textBaseline = 'middle';
-  const midY1 = top1H * 0.5;
-
-  ctx.fillStyle = '#fff';
-  ctx.font = `900 ${fLg}px ${font}`;
-  ctx.textAlign = 'left';
+  ctx.fillStyle='rgba(31,56,100,.92)'; ctx.fillRect(0,0,W,top1H);
+  const midY1=top1H*0.5;
+  const fLg=Math.max(12,Math.round(W*0.018)), fSm=Math.max(10,Math.round(W*0.013));
+  ctx.textBaseline='middle';
+  ctx.fillStyle='#fff'; ctx.font=`900 ${fLg}px ${font}`; ctx.textAlign='left';
   ctx.fillText('COGCON®', pad, midY1);
-
-  const label = [ST.name, ST.scenario].filter(Boolean).join(' — ') || 'Live Session';
-  ctx.font = `600 ${fSm}px ${font}`;
-  ctx.textAlign = 'center';
-  ctx.fillText(label, W/2, midY1);
-
-  const elapsed = ST.sessionStart ? Math.round((Date.now()-ST.sessionStart)/1000) : 0;
-  const mm = String(Math.floor(elapsed/60)).padStart(2,'0');
-  const ss = String(elapsed%60).padStart(2,'0');
-  const recStr = ST.recordVideo ? `● REC ${mm}:${ss}` : `◎ LIVE ${mm}:${ss}`;
-  ctx.font = `700 ${fSm}px ${font}`;
-  ctx.textAlign = 'right';
-  ctx.fillStyle = ST.recordVideo ? '#FF4444' : '#fff';
-  ctx.fillText(recStr, W - pad, midY1);
+  const lbl=[ST.name,ST.scenario].filter(Boolean).join(' — ')||'Live Session';
+  ctx.font=`600 ${fSm}px ${font}`; ctx.textAlign='center';
+  ctx.fillText(lbl, W/2, midY1);
+  const el=Math.round(((ST.sessionEnd||Date.now())-ST.sessionStart)/1000);
+  const mm=String(Math.floor(el/60)).padStart(2,'0'), ss=String(el%60).padStart(2,'0');
+  ctx.font=`700 ${fSm}px ${font}`; ctx.textAlign='right';
+  ctx.fillStyle=ST.recordVideo?'#FF4444':'#fff';
+  ctx.fillText(ST.recordVideo?`● REC ${mm}:${ss}`:`◎ LIVE ${mm}:${ss}`, W-pad, midY1);
   ctx.restore();
 
-  // ── TOP BAR 2: status ──
+  // TOP BAR 2
   ctx.save();
-  ctx.fillStyle = 'rgba(0,0,0,.5)';
-  ctx.fillRect(0, top1H, W, top2H);
+  ctx.fillStyle='rgba(0,0,0,.45)'; ctx.fillRect(0,top1H,W,top2H);
   ctx.restore();
 
-  // ── FULL-WIDTH TRACE STRIP ──
-  const traceY = top1H + top2H;
+  // FULL-WIDTH TRACE STRIP
+  const traceY=totTop;
   ctx.save();
-  ctx.fillStyle = 'rgba(0,0,0,.28)';
-  ctx.fillRect(0, traceY, W, traceH);
-
-  const LPAD = 34;
-  const plotW = W - LPAD;
-  const yTop2 = _yCenter + _yRange/2;
-  const yBot2 = _yCenter - _yRange/2;
-  function hrToY2(hr) { return traceY + traceH - ((hr-yBot2)/_yRange)*(traceH-8)-4; }
-
-  // Grid lines in trace area
-  const firstG = Math.ceil(yBot2/10)*10;
-  for (let bpm=firstG; bpm<=yTop2; bpm+=10) {
-    const yy = hrToY2(bpm);
-    ctx.beginPath();
-    ctx.strokeStyle = 'rgba(255,255,255,.12)';
-    ctx.lineWidth = 0.5;
-    ctx.moveTo(LPAD, yy); ctx.lineTo(W, yy); ctx.stroke();
-    ctx.fillStyle = 'rgba(255,255,255,.5)';
-    ctx.font = `11px ${font}`;
-    ctx.textAlign = 'right';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(bpm, LPAD-3, yy);
+  ctx.fillStyle='rgba(0,0,0,.32)'; ctx.fillRect(0,traceY,W,traceH);
+  const LW=38, PW=W-LW;
+  function tY(hr){return traceY+traceH-((hr-Y_MIN)/(Y_MAX-Y_MIN))*(traceH-10)-5;}
+  // Grid
+  for (let bpm=Y_MIN;bpm<=Y_MAX;bpm+=20) {
+    const yy=tY(bpm);
+    ctx.beginPath(); ctx.strokeStyle='rgba(255,255,255,.12)'; ctx.lineWidth=0.75;
+    ctx.moveTo(LW,yy); ctx.lineTo(W,yy); ctx.stroke();
+    ctx.fillStyle='rgba(255,255,255,.5)'; ctx.font=`10px ${font}`;
+    ctx.textAlign='right'; ctx.textBaseline='middle';
+    ctx.fillText(bpm, LW-3, yy);
   }
-
-  if (_beatTimes.length >= 2) {
-    const nowMs2    = ST.sessionStart ? (Date.now()-ST.sessionStart) : 0;
-    const viewEnd2  = nowMs2;
-    const viewStart2= viewEnd2 - WINDOW_MS;
-    let pX=null, pY=null;
-    ctx.lineWidth = 2.5;
-    for (let i=0; i<_beatTimes.length; i++) {
-      const t = _beatTimes[i];
-      if (t<viewStart2||t>viewEnd2) { pX=null; continue; }
-      const bx = LPAD + ((t-viewStart2)/WINDOW_MS)*plotW;
-      const by = hrToY2(_beatHR[i]);
-      if (pX!==null) {
-        ctx.beginPath();
-        ctx.strokeStyle = _cohColour(_beatCoh[i]);
-        ctx.moveTo(pX,pY); ctx.lineTo(bx,by); ctx.stroke();
-      }
-      pX=bx; pY=by;
+  // Trace
+  if (_beatTimes.length>=2) {
+    const nowMs2=ST.sessionStart?(Date.now()-ST.sessionStart):0;
+    const vEnd=nowMs2, vStart=vEnd-WINDOW_MS;
+    let px=null,py=null; ctx.lineWidth=2.5;
+    for (let i=0;i<_beatTimes.length;i++) {
+      const t=_beatTimes[i];
+      if(t<vStart||t>vEnd){px=null;continue;}
+      const bx=LW+((t-vStart)/WINDOW_MS)*PW, by=tY(_beatHR[i]);
+      if(px!==null){ctx.beginPath();ctx.strokeStyle=_cohColour(_beatCoh[i]);ctx.moveTo(px,py);ctx.lineTo(bx,by);ctx.stroke();}
+      px=bx; py=by;
     }
   }
-
-  // SEB indicator strip left edge within trace area (if active)
-  if (_sebWindowActive) {
-    ctx.fillStyle = '#00C896';
-    ctx.fillRect(0, traceY, 8, traceH);
-  }
+  // SEB strip
+  if (_sebWindowActive) { ctx.fillStyle='#00C896'; ctx.fillRect(0,traceY,8,traceH); }
   ctx.restore();
 
-  // ── BOTTOM READOUTS BAR ──
+  // BOTTOM READOUTS BAR
   ctx.save();
-  ctx.fillStyle = 'rgba(31,56,100,.88)';
-  ctx.fillRect(0, H-botH, W, botH);
-
-  const hr  = BLE.hr;
-  const coh = BLE.coherence;
-  const bX  = W - pad;
-  const bY  = H - botH/2;
-  const lblSz = Math.max(10, Math.round(W*0.012));
-  const valSz = Math.max(26, Math.round(W*0.046));
-  ctx.textBaseline = 'middle';
-
+  ctx.fillStyle='rgba(15,30,60,.9)'; ctx.fillRect(0,H-botH,W,botH);
+  const hr=BLE.hr, coh=BLE.coherence;
+  const bX=W-pad, bY=H-botH*0.5;
+  const lSz=Math.max(10,Math.round(W*0.012)), vSz=Math.max(26,Math.round(W*0.048));
+  ctx.textBaseline='middle';
   // EPOC
-  ctx.fillStyle = 'rgba(255,255,255,.48)';
-  ctx.font = `700 ${lblSz}px ${font}`;
-  ctx.textAlign = 'right';
-  ctx.fillText('EPOC', bX, bY - valSz*0.65);
-  ctx.fillStyle = '#fff';
-  ctx.font = `900 ${valSz}px ${font}`;
-  ctx.fillText(hr!==null?_epoc.toFixed(1):'0.0', bX, bY + valSz*0.15);
-  ctx.fillStyle = 'rgba(255,255,255,.42)';
-  ctx.font = `700 ${lblSz}px ${font}`;
-  ctx.fillText('ml/kg', bX, bY + valSz*0.85);
-
-  const hrX = bX - Math.round(W*0.10);
-  ctx.fillStyle = 'rgba(255,255,255,.48)';
-  ctx.font = `700 ${lblSz}px ${font}`;
-  ctx.fillText('HR', hrX, bY - valSz*0.65);
-  ctx.fillStyle = hr!==null ? _cohColour(coh) : '#fff';
-  ctx.font = `900 ${valSz}px ${font}`;
-  ctx.fillText(hr!==null?String(hr):'---', hrX, bY + valSz*0.15);
-  ctx.fillStyle = 'rgba(255,255,255,.42)';
-  ctx.font = `700 ${lblSz}px ${font}`;
-  ctx.fillText('BPM', hrX, bY + valSz*0.85);
+  ctx.fillStyle='rgba(255,255,255,.48)'; ctx.font=`700 ${lSz}px ${font}`; ctx.textAlign='right';
+  ctx.fillText('EPOC', bX, bY-vSz*0.65);
+  ctx.fillStyle='#fff'; ctx.font=`900 ${vSz}px ${font}`;
+  ctx.fillText(hr!==null?_epoc.toFixed(1):'0.0', bX, bY+vSz*0.1);
+  ctx.fillStyle='rgba(255,255,255,.42)'; ctx.font=`700 ${lSz}px ${font}`;
+  ctx.fillText('ml/kg', bX, bY+vSz*0.85);
+  // HR
+  const hX=bX-Math.round(W*0.10);
+  ctx.fillStyle='rgba(255,255,255,.48)'; ctx.font=`700 ${lSz}px ${font}`;
+  ctx.fillText('HR', hX, bY-vSz*0.65);
+  ctx.fillStyle=hr!==null?_cohColour(coh):'#fff'; ctx.font=`900 ${vSz}px ${font}`;
+  ctx.fillText(hr!==null?String(hr):'---', hX, bY+vSz*0.1);
+  ctx.fillStyle='rgba(255,255,255,.42)'; ctx.font=`700 ${lSz}px ${font}`;
+  ctx.fillText('BPM', hX, bY+vSz*0.85);
   ctx.restore();
 }
 
@@ -1079,55 +980,59 @@ async function _startCamera() {
     catch(e2) { console.warn('Camera unavailable:', e2.message); _camStream=null; return; }
   }
   const vis = _g('cam-visible');
-  vis.srcObject = _camStream; vis.style.display = 'block';
+  vis.srcObject=_camStream; vis.style.display='block';
   await vis.play().catch(()=>{});
-  const hid = _g('cam-feed');
-  hid.srcObject = _camStream;
-  await hid.play().catch(()=>{});
+  const hid=_g('cam-feed');
+  hid.srcObject=_camStream; await hid.play().catch(()=>{});
 
-  const canvas = _g('rec-canvas');
-  const dpr = window.devicePixelRatio || 1;
-  canvas.width  = Math.round(window.screen.width  * dpr);
-  canvas.height = Math.round(window.screen.height * dpr);
-  const ctx = canvas.getContext('2d');
-  _recChunks = [];
+  const canvas=_g('rec-canvas');
+  const dpr=window.devicePixelRatio||1;
+  canvas.width=Math.round(window.screen.width*dpr);
+  canvas.height=Math.round(window.screen.height*dpr);
+  const ctx=canvas.getContext('2d');
+  _recChunks=[];
 
-  (function frame() {
+  (function frame(){
     if (!_camStream) return;
-    ctx.drawImage(hid, 0, 0, canvas.width, canvas.height);
-    _drawRecordOverlay(ctx, canvas.width, canvas.height);
-    _rafId = requestAnimationFrame(frame);
+    ctx.drawImage(hid,0,0,canvas.width,canvas.height);
+    _drawRecordOverlay(ctx,canvas.width,canvas.height);
+    _rafId=requestAnimationFrame(frame);
   })();
 
-  const mime = ['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm']
-    .find(t => MediaRecorder.isTypeSupported(t)) || '';
-  _recorder = new MediaRecorder(canvas.captureStream(30), mime?{mimeType:mime}:{});
-  _recorder.ondataavailable = e => { if (e.data&&e.data.size>0) _recChunks.push(e.data); };
+  const mime=['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm']
+    .find(t=>MediaRecorder.isTypeSupported(t))||'';
+  _recorder=new MediaRecorder(canvas.captureStream(30),mime?{mimeType:mime}:{});
+  _recorder.ondataavailable=e=>{ if(e.data&&e.data.size>0) _recChunks.push(e.data); };
   _recorder.start(1000);
 }
 
 function _stopCamera() {
   if (_rafId) { cancelAnimationFrame(_rafId); _rafId=null; }
-  if (_recorder&&_recorder.state!=='inactive') _recorder.stop();
+  if (_recorder && _recorder.state!=='inactive') _recorder.stop();
   if (_camStream) { _camStream.getTracks().forEach(t=>t.stop()); _camStream=null; }
-  const vis = _g('cam-visible');
+  const vis=_g('cam-visible');
   if (vis) { vis.srcObject=null; vis.style.display='none'; }
 }
 
-// ── DOWNLOAD FUNCTIONS ────────────────────────────────────────────────────────
-function downloadVideo(chunks) {
-  if (!chunks || chunks.length===0) { alert('No video data recorded.'); return; }
-  const blob = new Blob(chunks, {type:'video/webm'});
-  const url  = URL.createObjectURL(blob);
-  const name = 'COGCON_Live_' + (ST.name.replace(/\s+/g,'_')||'Session')
-              + '_' + (ST.date.replace(/\//g,'-')||'date') + '.webm';
-  const a = document.createElement('a');
-  a.style.display='none'; a.href=url; a.download=name;
-  document.body.appendChild(a); a.click();
-  setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 2000);
+// ── DOWNLOAD FUNCTIONS (manual only, triggered by button) ─────────────────────
+function _doDownloadVideo() {
+  if (!_recChunks || _recChunks.length===0) {
+    alert('No video data was recorded.');
+    return;
+  }
+  const blob=new Blob(_recChunks,{type:'video/webm'});
+  const url=URL.createObjectURL(blob);
+  const name='COGCON_Live_'+(ST.name.replace(/\s+/g,'_')||'Session')
+             +'_'+(ST.date.replace(/\//g,'-')||'date')+'.webm';
+  const a=document.createElement('a');
+  a.href=url; a.download=name;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url), 60000);
+  const conf=_g('dl-video-confirm');
+  if (conf) conf.textContent='✓ Video saved to Downloads';
 }
 
-function downloadCSV() {
+function _doDownloadCSV() {
   const log=ST.hrLog, dur=ST.sessionEnd?Math.round((ST.sessionEnd-ST.sessionStart)/1000):0;
   const hrs=log.map(e=>e.hr), cohs=log.map(e=>e.coh), n=cohs.length;
   const avg=arr=>arr.length?Math.round(arr.reduce((a,b)=>a+b,0)/arr.length):'';
@@ -1135,25 +1040,27 @@ function downloadCSV() {
   const rows=[
     ['candidate_name','organisation','assessor','scenario','date','duration_seconds',
      'avg_hr_bpm','min_hr_bpm','max_hr_bpm','avg_coherence_pct','peak_epoc_mlkg',
-     'pct_gt70_coh','pct_40_70_coh','pct_20_40_coh','pct_lt20_coh','seb_window_count','video_recorded'],
+     'pct_green_gte60_coh','pct_amber_20_59_coh','pct_red_lt20_coh','seb_window_count','video_recorded'],
     [ST.name,ST.org,ST.assessor,ST.scenario,ST.date,dur,
      avg(hrs),hrs.length?Math.min(...hrs):'',hrs.length?Math.max(...hrs):'',
      avg(cohs),ST.peakEpoc.toFixed(2),
-     pct(cohs.filter(c=>c>70).length),pct(cohs.filter(c=>c>=40&&c<=70).length),
-     pct(cohs.filter(c=>c>=20&&c<40).length),pct(cohs.filter(c=>c<20).length),
-     ST.sebWindows.length, ST.recordVideo?'yes':'no'],
+     pct(cohs.filter(c=>c>=60).length),pct(cohs.filter(c=>c>=20&&c<60).length),
+     pct(cohs.filter(c=>c<20).length),
+     ST.sebWindows.length,ST.recordVideo?'yes':'no'],
     ['--- per second log ---'],['elapsed_s','hr_bpm','coherence_pct'],
     ...log.map((e,i)=>[i+1,e.hr,e.coh])
   ];
-  const csvContent=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
-  const blob=new Blob([csvContent],{type:'text/csv;charset=utf-8;'});
+  const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
   const url=URL.createObjectURL(blob);
   const name='COGCON_Live_'+(ST.name.replace(/\s+/g,'_')||'Session')
              +'_'+(ST.date.replace(/\//g,'-')||'date')+'.csv';
   const a=document.createElement('a');
-  a.style.display='none'; a.href=url; a.download=name;
-  document.body.appendChild(a); a.click();
-  setTimeout(()=>{ document.body.removeChild(a); URL.revokeObjectURL(url); },2000);
+  a.href=url; a.download=name;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url), 60000);
+  const conf=_g('dl-csv-confirm');
+  if (conf) conf.textContent='✓ CSV saved to Downloads';
 }
 
 // ── LIVE UPDATE LOOP (1 s) ────────────────────────────────────────────────────
@@ -1162,20 +1069,18 @@ let _liveTimer=null;
 function _startLoop() {
   _epoc=0; _epocRest=60;
   _beatTimes=[]; _beatHR=[]; _beatCoh=[];
-  _xOffset=0; _yCenter=120;
-  _sebLowStart=null; _sebWindowActive=false;
+  _sebWindowActive=false;
 
-  _liveTimer = setInterval(() => {
-    const hr  = BLE.hr;
-    const coh = BLE.coherence;
+  _liveTimer=setInterval(()=>{
+    const hr=BLE.hr, coh=BLE.coherence;
 
-    if (hr !== null) {
+    if (hr!==null) {
       _updateEpoc(hr);
-      ST.hrLog.push({ ts:Date.now(), hr, coh });
-      if (_epoc > ST.peakEpoc) ST.peakEpoc = _epoc;
-      // Fallback trace push if no RR data
-      if (!BLE.hasRR && ST.sessionStart !== null) {
-        const t = Date.now() - ST.sessionStart;
+      ST.hrLog.push({ts:Date.now(),hr,coh});
+      if (_epoc>ST.peakEpoc) ST.peakEpoc=_epoc;
+      // Fallback per-second trace if no RR data
+      if (!BLE.hasRR && ST.sessionStart!==null) {
+        const t=Date.now()-ST.sessionStart;
         _beatTimes.push(t); _beatHR.push(hr); _beatCoh.push(coh);
       }
     }
@@ -1183,12 +1088,24 @@ function _startLoop() {
     _checkSEB(hr, coh);
 
     // EPOC readout
-    const epocEl = _g('lv-epoc');
-    if (epocEl) epocEl.textContent = _epoc.toFixed(1);
+    const epocEl=_g('lv-epoc');
+    if (epocEl) epocEl.textContent=_epoc.toFixed(1);
 
-    // Elapsed timer
-    const elEl = _g('live-elapsed');
-    if (elEl) elEl.textContent = _elapsedStr();
+    // HR readout (also updated per-beat in BLE.onData; update here for no-RR mode)
+    if (!BLE.hasRR) {
+      const hrEl=_g('lv-hr');
+      if (hrEl) {
+        hrEl.textContent=hr!==null?hr:'---';
+        hrEl.style.color=hr!==null?_cohColour(coh):'#ffffff';
+      }
+    }
+
+    // Elapsed time
+    const elEl=_g('live-elapsed');
+    if (elEl && ST.sessionStart) {
+      const s=Math.round((Date.now()-ST.sessionStart)/1000);
+      elEl.textContent=Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
+    }
 
     _drawTrace();
   }, 1000);
@@ -1198,147 +1115,161 @@ function _stopLoop() {
   if (_liveTimer) { clearInterval(_liveTimer); _liveTimer=null; }
 }
 
+// ── BUILD DOWNLOAD SCREEN ─────────────────────────────────────────────────────
+function _buildDownloadScreen() {
+  const log=ST.hrLog;
+  const dur=ST.sessionEnd?Math.round((ST.sessionEnd-ST.sessionStart)/1000):0;
+  const mins=Math.floor(dur/60), secs=dur%60;
+  const hrs=log.map(e=>e.hr), cohs=log.map(e=>e.coh);
+  const avg=arr=>arr.length?Math.round(arr.reduce((a,b)=>a+b,0)/arr.length):0;
+  const peakHR=hrs.length?Math.max(...hrs):0;
+
+  // Format date-time of stop
+  const now=new Date();
+  const timeStr=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+
+  const rows=[
+    ['Candidate',ST.name||'—'],
+    ['Organisation',ST.org||'—'],
+    ['Scenario',ST.scenario||'—'],
+    ['Date & Time',ST.date+(ST.date?' '+timeStr:''+timeStr)],
+    ['Duration',mins+':'+String(secs).padStart(2,'0')],
+    ['Peak HR',peakHR?peakHR+' bpm':'—'],
+    ['Average HR',hrs.length?avg(hrs)+' bpm':'—'],
+    ['Average Coherence',cohs.length?avg(cohs)+'%':'—'],
+    ['SEB Windows',ST.sebWindows.length],
+    ['Video Recorded',ST.recordVideo?'Yes':'No']
+  ];
+
+  const container=_g('dl-summary-rows');
+  if (container) {
+    container.innerHTML=rows.map(([l,v])=>
+      `<div class="dl-summary-row"><span class="dl-summary-lbl">${l}</span><span class="dl-summary-val">${v}</span></div>`
+    ).join('');
+  }
+
+  // Show/hide video button
+  const vbtn=_g('btn-dl-video');
+  if (vbtn) vbtn.style.display=ST.recordVideo?'':'none';
+
+  // Reset confirm messages
+  const vc=_g('dl-video-confirm'); if(vc) vc.textContent='';
+  const cc=_g('dl-csv-confirm');   if(cc) cc.textContent='';
+}
+
 // ── BLE ERROR SCREEN ──────────────────────────────────────────────────────────
 function _showBLEError(errMsg) {
-  const isIOS    = /iP(ad|hone|od)/i.test(navigator.userAgent);
-  const isChrome = /Chrome/i.test(navigator.userAgent) && !/Edg/i.test(navigator.userAgent);
-  const body     = _g('ble-err-body');
-  const pageURL  = window.location.href;
-  let html = '';
+  const isIOS=/iP(ad|hone|od)/i.test(navigator.userAgent);
+  const isChrome=/Chrome/i.test(navigator.userAgent)&&!/Edg/i.test(navigator.userAgent);
+  const body=_g('ble-err-body');
+  const url=window.location.href;
+  let html='';
   if (isIOS) {
-    html = `<div class="ble-err-icon">📱</div>
+    html=`<div class="ble-err-icon">📱</div>
       <div class="ble-err-title">Use Bluefy Browser on iPad / iPhone</div>
-      <div class="ble-err-desc">Safari does not support Bluetooth. Download the free Bluefy browser app, then open this page in Bluefy.</div>
-      <div class="ble-step"><div class="ble-step-num">1</div><p style="font-size:15px;color:var(--g700)">Download <strong>Bluefy</strong> from the App Store (free, by Lau Meijer).</p></div>
-      <div class="ble-step"><div class="ble-step-num">2</div><p style="font-size:15px;color:var(--g700)">Copy this URL and open it in Bluefy:</p></div>
-      <div class="ble-url-box" onclick="navigator.clipboard&&navigator.clipboard.writeText('${pageURL}').then(()=>alert('URL copied!'))">${pageURL}</div>
+      <div class="ble-err-desc">Safari does not support Bluetooth. Download the free Bluefy browser, then open this page in it.</div>
+      <div class="ble-step"><div class="ble-step-num">1</div><p style="font-size:15px;color:var(--g700)">Download <strong>Bluefy</strong> from the App Store (free).</p></div>
+      <div class="ble-step"><div class="ble-step-num">2</div><p style="font-size:15px;color:var(--g700)">Copy this URL and paste it into Bluefy:</p></div>
+      <div class="ble-url-box" onclick="navigator.clipboard&&navigator.clipboard.writeText('${url}').then(()=>alert('URL copied!'))">${url}</div>
       <div class="ble-step"><div class="ble-step-num">3</div><p style="font-size:15px;color:var(--g700)">Tap Connect Strap again inside Bluefy.</p></div>`;
   } else if (!isChrome) {
-    html = `<div class="ble-err-icon">💻</div>
-      <div class="ble-err-title">Use Google Chrome on Desktop</div>
-      <div class="ble-err-desc">Bluetooth requires Google Chrome or Microsoft Edge. Your current browser does not support it.</div>
+    html=`<div class="ble-err-icon">💻</div>
+      <div class="ble-err-title">Use Google Chrome</div>
+      <div class="ble-err-desc">Bluetooth requires Chrome or Edge. Your current browser does not support it.</div>
       <div class="ble-step"><div class="ble-step-num">1</div><p style="font-size:15px;color:var(--g700)">Download Chrome from <strong>google.com/chrome</strong></p></div>
       <div class="ble-step"><div class="ble-step-num">2</div><p style="font-size:15px;color:var(--g700)">Open this page in Chrome and try again.</p></div>`;
   } else {
-    html = `<div class="ble-err-icon">⚠️</div>
+    html=`<div class="ble-err-icon">⚠️</div>
       <div class="ble-err-title">Bluetooth Connection Failed</div>
-      <div class="ble-err-desc">${errMsg||'Could not connect to the heart rate strap. Make sure it is charged, worn, and in pairing mode.'}</div>`;
+      <div class="ble-err-desc">${errMsg||'Make sure the heart rate strap is charged, worn, and in pairing mode.'}</div>`;
   }
-  html += `<button class="btn btn-outline" onclick="_closeBLEError()" style="margin-top:24px">&#8592; Back</button>`;
-  body.innerHTML = html;
+  html+=`<button class="btn btn-outline" onclick="_closeBLEError()" style="margin-top:24px">&#8592; Back</button>`;
+  body.innerHTML=html;
   _g('ble-error').classList.add('open');
 }
 function _closeBLEError() { _g('ble-error').classList.remove('open'); }
 
 // ── APP CONTROLLER ────────────────────────────────────────────────────────────
-const LV = {
+const LV={
 
-  onRecordToggle(on) {
-    ST.recordVideo = on;
-    const note = _g('record-note');
-    if (note) note.style.display = on ? 'none' : '';
+  onRecordToggle(on){
+    ST.recordVideo=on;
+    const note=_g('record-note');
+    if(note) note.style.display=on?'none':'';
   },
 
-  async startSession() {
-    const name     = _g('lv-name').value.trim();
-    const org      = _g('lv-org').value.trim();
-    const assessor = _g('lv-assessor').value.trim();
-    const scenario = _g('lv-scenario').value.trim();
-    const date     = _g('lv-date').value.trim();
-    if (!name) { alert('Enter candidate name.'); return; }
-    if (!org)  { alert('Enter organisation.'); return; }
-    if (!date || !/^\d{2}\/\d{2}\/\d{4}$/.test(date)) { alert('Enter date in DD/MM/YYYY format.'); return; }
+  async startSession(){
+    const name    =_g('lv-name').value.trim();
+    const org     =_g('lv-org').value.trim();
+    const assessor=_g('lv-assessor').value.trim();
+    const scenario=_g('lv-scenario').value.trim();
+    const date    =_g('lv-date').value.trim();
+    if(!name){alert('Enter candidate name.');return;}
+    if(!org){alert('Enter organisation.');return;}
+    if(!date||!/^\d{2}\/\d{2}\/\d{4}$/.test(date)){alert('Enter date as DD/MM/YYYY.');return;}
 
-    Object.assign(ST, { name, org, assessor, scenario, date,
-      sessionStart:Date.now(), sessionEnd:null, hrLog:[], peakEpoc:0, sebWindows:[] });
+    Object.assign(ST,{name,org,assessor,scenario,date,
+      sessionStart:Date.now(),sessionEnd:null,
+      hrLog:[],peakEpoc:0,sebWindows:[]});
 
-    // Set live screen labels
-    const lbl = _g('live-session-lbl');
-    if (lbl) lbl.textContent = [name, scenario].filter(Boolean).join(' — ');
+    const lbl=_g('live-session-lbl');
+    if(lbl) lbl.textContent=[name,scenario].filter(Boolean).join(' — ');
 
     _showScreen('live');
+    _resizeCanvas();
 
-    // REC indicator
-    const ri = _g('rec-indicator');
-    if (ST.recordVideo) {
-      if (ri) { ri.innerHTML='&#9679; REC'; ri.classList.add('recording'); }
+    const ri=_g('rec-indicator');
+    if(ST.recordVideo){
+      if(ri){ri.innerHTML='&#9679; REC';ri.classList.add('recording');}
       await _startCamera();
     } else {
-      if (ri) { ri.innerHTML='&#9711; LIVE'; ri.classList.remove('recording'); }
+      if(ri){ri.innerHTML='&#9711; LIVE';ri.classList.remove('recording');}
     }
 
     _startLoop();
   },
 
-  stopSession() {
-    ST.sessionEnd = Date.now();
+  stopSession(){
+    ST.sessionEnd=Date.now();
     _stopLoop();
 
-    // Close open SEB window
-    if (_sebWindowActive) {
-      const last = ST.sebWindows[ST.sebWindows.length-1];
-      if (last) last.end = ST.sessionEnd;
-      _sebWindowActive = false;
+    if(_sebWindowActive){
+      const last=ST.sebWindows[ST.sebWindows.length-1];
+      if(last) last.end=ST.sessionEnd;
+      _sebWindowActive=false;
     }
 
-    // Auto-downloads
-    if (ST.recordVideo) {
-      _stopCamera();
-      setTimeout(() => downloadVideo(_recChunks), 400);
-    }
-    setTimeout(() => downloadCSV(), ST.recordVideo ? 1600 : 400);
+    if(ST.recordVideo) _stopCamera();
 
-    this._buildSummary();
-    _showScreen('summary');
+    // Reset SEB indicator
+    const si=_g('seb-indicator'); if(si) si.classList.remove('active');
+
+    _buildDownloadScreen();
+    _showScreen('download');
   },
 
-  toggleTraceMode() {
-    ST.darkTrace = !ST.darkTrace;
-    const btn = _g('btn-mode');
-    if (btn) btn.innerHTML = ST.darkTrace ? '&#9788;' : '&#9790;';
+  toggleTraceMode(){
+    ST.darkTrace=!ST.darkTrace;
+    const btn=_g('btn-mode');
+    if(btn) btn.innerHTML=ST.darkTrace?'&#9788;':'&#9790;';
   },
 
-  _buildSummary() {
-    const log  = ST.hrLog;
-    const dur  = Math.round(((ST.sessionEnd||Date.now())-ST.sessionStart)/1000);
-    _g('sum-dur').textContent = Math.floor(dur/60)+':'+String(dur%60).padStart(2,'0');
-    _g('sum-meta').textContent = [ST.name,ST.org,ST.scenario,ST.date].filter(Boolean).join(' · ');
-
-    if (log.length===0) {
-      ['sum-hr','sum-epoc','sum-coh','sum-hi','sum-mid','sum-amb','sum-lo']
-        .forEach(id=>{ const el=_g(id); if(el) el.textContent='—'; });
-      const vb=_g('btn-dl-video'); if(vb) vb.style.display='none';
-      return;
-    }
-    const hrs=log.map(e=>e.hr), cohs=log.map(e=>e.coh), n=cohs.length;
-    const avg=arr=>Math.round(arr.reduce((a,b)=>a+b,0)/arr.length);
-    const pct=k=>n>0?Math.round(k/n*100)+'%':'—';
-    _g('sum-hr').innerHTML = avg(hrs)+'<span class="metric-cell-unit">bpm</span>';
-    _g('sum-epoc').innerHTML = ST.peakEpoc.toFixed(1)+'<span class="metric-cell-unit">ml/kg</span>';
-    _g('sum-coh').innerHTML = avg(cohs)+'<span class="metric-cell-unit">%</span>';
-    _g('sum-hi').textContent  = pct(cohs.filter(c=>c>70).length);
-    _g('sum-mid').textContent = pct(cohs.filter(c=>c>=40&&c<=70).length);
-    _g('sum-amb').textContent = pct(cohs.filter(c=>c>=20&&c<40).length);
-    _g('sum-lo').textContent  = pct(cohs.filter(c=>c<20).length);
-    const vb=_g('btn-dl-video'); if(vb) vb.style.display = ST.recordVideo ? '' : 'none';
-  },
-
-  newSession() {
+  newSession(){
     _stopLoop();
-    if (ST.recordVideo) _stopCamera();
+    if(ST.recordVideo) _stopCamera();
     Object.assign(ST,{name:'',org:'',assessor:'',scenario:'',date:'',
       recordVideo:true,darkTrace:true,sessionStart:null,sessionEnd:null,
       hrLog:[],peakEpoc:0,sebWindows:[]});
     _epoc=0; _recChunks=[];
     _beatTimes=[]; _beatHR=[]; _beatCoh=[];
-    _xOffset=0; _yCenter=120;
-    _sebLowStart=null; _sebWindowActive=false;
+    _sebWindowActive=false;
     const tr=_g('toggle-record'); if(tr) tr.checked=true;
     const rn=_g('record-note');   if(rn) rn.style.display='none';
     const mb=_g('btn-mode');      if(mb) mb.innerHTML='&#9788;';
-    const edge=_g('seb-edge');    if(edge) edge.classList.remove('active');
-    const slbl=_g('seb-label');   if(slbl) slbl.classList.remove('active');
-    ['lv-name','lv-org','lv-assessor','lv-scenario'].forEach(id=>{ const el=_g(id); if(el) el.value=''; });
+    const si=_g('seb-indicator'); if(si) si.classList.remove('active');
+    ['lv-name','lv-org','lv-assessor','lv-scenario'].forEach(id=>{
+      const el=_g(id); if(el) el.value='';
+    });
     _showScreen('setup');
   }
 };
@@ -1346,27 +1277,26 @@ const LV = {
 // ── INFO PANEL ────────────────────────────────────────────────────────────────
 function _openInfo()  { _g('info-panel').classList.add('open'); }
 function _closeInfo() { _g('info-panel').classList.remove('open'); }
-function _infoTab(idx) {
+function _infoTab(idx){
   document.querySelectorAll('.info-tab').forEach((t,i)=>t.classList.toggle('active',i===idx));
   document.querySelectorAll('.info-pane').forEach((p,i)=>p.classList.toggle('active',i===idx));
 }
 
 // ── HELPERS ───────────────────────────────────────────────────────────────────
-function _g(id) { return document.getElementById(id); }
-function _showScreen(name) {
+function _g(id){ return document.getElementById(id); }
+function _showScreen(name){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   _g('screen-'+name).classList.add('active');
 }
-function _autoFormatDate(input) {
+function _autoFormatDate(input){
   let v=input.value.replace(/\D/g,'');
   if(v.length>2) v=v.slice(0,2)+'/'+v.slice(2);
   if(v.length>5) v=v.slice(0,5)+'/'+v.slice(5);
   input.value=v.slice(0,10);
 }
-
-function doLogin() {
+function doLogin(){
   const val=_g('lv-pw').value;
-  if (val==='COGCON2026') {
+  if(val==='COGCON2026'){
     sessionStorage.setItem('lv_auth','1');
     _g('login-gate').classList.add('hidden');
   } else {
@@ -1376,14 +1306,20 @@ function doLogin() {
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
-(function() {
-  if (sessionStorage.getItem('lv_auth')==='1') _g('login-gate').classList.add('hidden');
+(function(){
+  if(sessionStorage.getItem('lv_auth')==='1') _g('login-gate').classList.add('hidden');
   const d=new Date();
-  _g('lv-date').value = String(d.getDate()).padStart(2,'0')+'/'
+  _g('lv-date').value=String(d.getDate()).padStart(2,'0')+'/'
     +String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear();
-  _g('lv-date').addEventListener('input', function(){ _autoFormatDate(this); });
+  _g('lv-date').addEventListener('input',function(){_autoFormatDate(this);});
   const pw=_g('lv-pw');
-  if (pw) pw.addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
+  if(pw) pw.addEventListener('keydown',e=>{if(e.key==='Enter') doLogin();});
+
+  // Canvas sizing
+  window.addEventListener('resize', _resizeCanvas);
+  document.addEventListener('DOMContentLoaded', _resizeCanvas);
+  // Also resize after a short delay to catch any layout shifts
+  setTimeout(_resizeCanvas, 100);
 })();
 </script>
 </body>
