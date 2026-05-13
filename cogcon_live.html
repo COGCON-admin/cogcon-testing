@@ -530,7 +530,7 @@ p{font-size:15px;line-height:1.6;color:var(--g700)}
         <div class="info-card-icon">&#9889;</div>
         <h3>SEB Windows</h3>
         <div class="what-lbl">What it is</div>
-        <p>Periods where coherence drops below 30% — automatically detected and flagged in real time. Activates immediately and clears as soon as coherence returns to 30% or above.</p>
+        <p>Periods where coherence drops below 23% — automatically detected and flagged in real time. Activates immediately and clears as soon as coherence returns to 23% or above.</p>
         <div class="what-lbl">Why it matters</div>
         <p>SEB windows are retrospective coaching anchors — where SEB would have had highest impact.</p>
         <div class="what-lbl">What to look for</div>
@@ -547,7 +547,7 @@ p{font-size:15px;line-height:1.6;color:var(--g700)}
       </div>
       <div class="colour-band" style="background:var(--coh-amb)">
         <h4>AMBER — At Risk (20–59%)</h4>
-        <p>Coherence 20–59% — Regulation under increasing load. SEB here prevents further dysregulation. SEB window active below 30%.</p>
+        <p>Coherence 20–59% — Regulation under increasing load. SEB here prevents further dysregulation. SEB window active below 23%.</p>
       </div>
       <div class="colour-band" style="background:var(--coh-lo)">
         <h4>RED — Dysregulated (0–19%)</h4>
@@ -651,7 +651,7 @@ const KEEP_MS   = 300000;  // keep 5 min of history
 const Y_MIN = 70, Y_MAX = 180;
 
 // ── SEB DETECTION STATE ───────────────────────────────────────────────────────
-let _sebWindowActive = false;  // triggers immediately when coh < 30%
+let _sebWindowActive = false;  // triggers immediately when coh < 23%
 
 // ── EPOC ──────────────────────────────────────────────────────────────────────
 let _epoc = 0, _epocRest = 60;
@@ -837,8 +837,9 @@ function _drawTrace() {
   const viewEnd   = nowMs;
   const viewStart = viewEnd - WINDOW_MS;
 
-  ctx.lineWidth = 2.5;
+  ctx.lineWidth = 8;
   ctx.lineJoin  = 'round';
+  ctx.lineCap   = 'round';
   let prevX=null, prevY=null;
   for (let i=0; i<_beatTimes.length; i++) {
     const t = _beatTimes[i];
@@ -854,10 +855,10 @@ function _drawTrace() {
   }
 }
 
-// ── SEB DETECTION (immediate: below 30% = on, 30%+ = off) ────────────────────
+// ── SEB DETECTION (immediate: below 23% = on, 23%+ = off) ────────────────────
 function _checkSEB(hr, coh) {
   const now = Date.now();
-  if (hr !== null && coh < 30) {
+  if (hr !== null && coh < 23) {
     if (!_sebWindowActive) {
       _sebWindowActive = true;
       ST.sebWindows.push({ start: now, end: null });
@@ -931,7 +932,9 @@ function _drawRecordOverlay(ctx, W, H) {
   if (_beatTimes.length>=2) {
     const nowMs2=ST.sessionStart?(Date.now()-ST.sessionStart):0;
     const vEnd=nowMs2, vStart=vEnd-WINDOW_MS;
-    let px=null,py=null; ctx.lineWidth=2.5;
+    let px=null,py=null;
+    ctx.lineWidth=Math.max(6, Math.round(W*0.006));
+    ctx.lineCap='round';
     for (let i=0;i<_beatTimes.length;i++) {
       const t=_beatTimes[i];
       if(t<vStart||t>vEnd){px=null;continue;}
@@ -973,11 +976,19 @@ function _drawRecordOverlay(ctx, W, H) {
 let _camStream=null, _recorder=null, _recChunks=[], _rafId=null;
 
 async function _startCamera() {
+  // Request video + audio so the recording includes ambient sound
   try {
-    _camStream = await navigator.mediaDevices.getUserMedia({ video:{facingMode:'environment'}, audio:false });
+    _camStream = await navigator.mediaDevices.getUserMedia({ video:{facingMode:'environment'}, audio:true });
   } catch(e) {
-    try { _camStream = await navigator.mediaDevices.getUserMedia({ video:true, audio:false }); }
-    catch(e2) { console.warn('Camera unavailable:', e2.message); _camStream=null; return; }
+    try { _camStream = await navigator.mediaDevices.getUserMedia({ video:true, audio:true }); }
+    catch(e2) {
+      // Audio permission denied — fall back to video-only
+      try { _camStream = await navigator.mediaDevices.getUserMedia({ video:{facingMode:'environment'}, audio:false }); }
+      catch(e3) {
+        try { _camStream = await navigator.mediaDevices.getUserMedia({ video:true, audio:false }); }
+        catch(e4) { console.warn('Camera unavailable:', e4.message); _camStream=null; return; }
+      }
+    }
   }
   const vis = _g('cam-visible');
   vis.srcObject=_camStream; vis.style.display='block';
@@ -999,9 +1010,23 @@ async function _startCamera() {
     _rafId=requestAnimationFrame(frame);
   })();
 
-  const mime=['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm']
-    .find(t=>MediaRecorder.isTypeSupported(t))||'';
-  _recorder=new MediaRecorder(canvas.captureStream(30),mime?{mimeType:mime}:{});
+  // Build a combined stream: canvas video + original audio tracks
+  const canvasStream = canvas.captureStream(30);
+  const audioTracks  = _camStream.getAudioTracks();
+  const recStream    = audioTracks.length
+    ? new MediaStream([...canvasStream.getVideoTracks(), ...audioTracks])
+    : canvasStream;
+
+  // Prefer MIME types that include an audio codec
+  const mime = [
+    'video/webm;codecs=vp9,opus',
+    'video/webm;codecs=vp8,opus',
+    'video/webm;codecs=vp9',
+    'video/webm;codecs=vp8',
+    'video/webm'
+  ].find(t => MediaRecorder.isTypeSupported(t)) || '';
+
+  _recorder = new MediaRecorder(recStream, mime ? {mimeType:mime} : {});
   _recorder.ondataavailable=e=>{ if(e.data&&e.data.size>0) _recChunks.push(e.data); };
   _recorder.start(1000);
 }
@@ -1128,6 +1153,13 @@ function _buildDownloadScreen() {
   const now=new Date();
   const timeStr=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
 
+  // Coherence band percentages (3-band: Green ≥60%, Amber 20–59%, Red <20%)
+  const n=cohs.length;
+  const pct=k=>n>0?(k/n*100).toFixed(1)+'%':'—';
+  const cohGreen = pct(cohs.filter(c=>c>=60).length);
+  const cohAmber = pct(cohs.filter(c=>c>=20&&c<60).length);
+  const cohRed   = pct(cohs.filter(c=>c<20).length);
+
   const rows=[
     ['Candidate',ST.name||'—'],
     ['Organisation',ST.org||'—'],
@@ -1137,6 +1169,9 @@ function _buildDownloadScreen() {
     ['Peak HR',peakHR?peakHR+' bpm':'—'],
     ['Average HR',hrs.length?avg(hrs)+' bpm':'—'],
     ['Average Coherence',cohs.length?avg(cohs)+'%':'—'],
+    ['🟢 Green (≥60%)',cohGreen],
+    ['🟡 Amber (20–59%)',cohAmber],
+    ['🔴 Red (<20%)',cohRed],
     ['SEB Windows',ST.sebWindows.length],
     ['Video Recorded',ST.recordVideo?'Yes':'No']
   ];
